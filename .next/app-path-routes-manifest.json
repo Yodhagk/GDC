@@ -5,15 +5,15 @@
   "/api/register/route": "/api/register",
   "/api/admin/documents/route": "/api/admin/documents",
   "/api/files/download/route": "/api/files/download",
-  "/api/files/route": "/api/files",
   "/api/upload/route": "/api/upload",
+  "/api/files/route": "/api/files",
   "/(marketing)/page": "/",
   "/portal/page": "/portal",
   "/portal/login/page": "/portal/login",
   "/portal/register/page": "/portal/register",
-  "/admin/page": "/admin",
+  "/(marketing)/about/page": "/about",
   "/(marketing)/services/page": "/services",
   "/(marketing)/contact/page": "/contact",
-  "/(marketing)/about/page": "/about",
-  "/it-support/page": "/it-support"
+  "/it-support/page": "/it-support",
+  "/admin/page": "/admin"
 }

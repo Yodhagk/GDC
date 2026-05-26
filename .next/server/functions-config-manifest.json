@@ -3,7 +3,7 @@
   "functions": {
     "/api/admin/documents": {},
     "/api/files/download": {},
-    "/api/files": {},
-    "/api/upload": {}
+    "/api/upload": {},
+    "/api/files": {}
   }
 }

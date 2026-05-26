@@ -9,7 +9,7 @@ const { execSync } = require('child_process');
 console.log('⚙️  Running Hostinger build (prisma generate only — .next is pre-built)');
 
 try {
-  execSync('npx prisma generate', { stdio: 'inherit' });
+  execSync('node node_modules/prisma/build/index.js generate', { stdio: 'inherit' });
   console.log('✅ Prisma client generated.');
 } catch (e) {
   console.warn('⚠️  Prisma generate warning (non-fatal):', e.message);
