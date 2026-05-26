@@ -22,6 +22,7 @@ const SOURCE_DIRS = ['prisma', 'public', 'scripts'];
 
 // Individual source files
 const FILES = [
+  'server.js',
   'package.json',
   'package-lock.json',
   'next.config.mjs',
