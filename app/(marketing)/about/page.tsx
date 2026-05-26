@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Award, Users, TrendingUp, Heart, ArrowRight, CheckCircle } from 'lucide-react';
+import { Award, Users, TrendingUp, Heart, ArrowRight } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'About Us',
@@ -15,9 +15,9 @@ const values = [
 ];
 
 const team = [
-  { name: 'James A. Richardson, CPA', role: 'Founder & Managing Partner', exp: '22 years', initials: 'JR' },
+  { name: 'Priti Patel', role: 'Founder and CEO', exp: '22 years', initials: 'PP' },
   { name: 'Maria Gonzalez, EA', role: 'IRS Compliance Director', exp: '16 years', initials: 'MG' },
-  { name: 'David Park, CPA', role: 'Senior Tax Consultant', exp: '14 years', initials: 'DP' },
+  { name: 'Mona', role: 'Senior Tax Consultant', exp: '14 years', initials: 'MO' },
   { name: 'Priya Sharma, CPA', role: 'Business Tax Specialist', exp: '11 years', initials: 'PS' },
 ];
 
@@ -48,9 +48,9 @@ export default function AboutPage() {
             <div>
               <h2 className="section-heading mb-6">Our Story</h2>
               <p className="text-gray-600 leading-relaxed mb-5">
-                Golden Dollar Consultancy was founded in 2009 by James Richardson, a CPA with a
-                vision: bring big-firm expertise to everyday Americans and small businesses who
-                deserved better than cookie-cutter tax preparation.
+                Golden Dollar Consultancy was founded in 2009 by Priti Patel, a tax professional
+                with a vision: bring big-firm expertise to everyday Americans and small businesses
+                who deserved better than cookie-cutter tax preparation.
               </p>
               <p className="text-gray-600 leading-relaxed mb-5">
                 Starting with just three clients in a Manhattan office, we've grown to serve over
