@@ -6,8 +6,8 @@
 # Testing
 /coverage
 
-# Next.js
-/.next/
+# Next.js — exclude only the build cache, keep compiled output for Hostinger deployment
+/.next/cache/
 /out/
 
 # Production
