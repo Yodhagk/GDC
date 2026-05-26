@@ -1,25 +1,22 @@
 'use strict';
 /**
- * Fixes directory/file permissions before the Next.js build on Linux.
- * Windows ZIPs created with PowerShell Compress-Archive strip Unix permission
- * bits, so directories land without the execute bit and Next.js cannot traverse
- * them (EACCES during scandir). This script is a no-op on Windows.
+ * Belt-and-suspenders fallback: fixes Unix permissions before Next.js build.
+ * Primary fix is the ZIP itself (archiver sets mode bits at creation time).
+ * This script handles edge cases where a manual extract strips permissions.
+ * No-op on Windows.
  */
 if (process.platform === 'win32') process.exit(0);
 
 const { execSync } = require('child_process');
 
-const targets = [
-  'app', 'components', 'lib', 'types', 'pages',
-  'prisma', 'public', 'scripts', 'middleware.ts',
-].join(' ');
-
 try {
-  // Directories need 755, files need 644
-  execSync(`find ${targets} -type d -exec chmod 755 {} +`, { stdio: 'inherit', shell: true });
-  execSync(`find ${targets} -type f -exec chmod 644 {} +`, { stdio: 'inherit', shell: true });
-  console.log('✅ Permissions fixed.');
+  // chmod -R on the project root applies permissions top-down:
+  // parent dirs get execute before child dirs are traversed.
+  // a+rX  = read for all + execute ONLY on directories (capital X)
+  execSync('chmod -R a+rX . 2>/dev/null || true', { stdio: 'inherit', shell: true, cwd: process.cwd() });
+  // Restrict file read to owner+group only for .env files (extra safety)
+  execSync('find . -maxdepth 1 -name ".env*" -exec chmod 600 {} + 2>/dev/null || true', { stdio: 'inherit', shell: true });
+  console.log('✅ Permissions ready.');
 } catch (e) {
-  // Non-fatal — build may still succeed
   console.warn('⚠️  chmod warning (non-fatal):', e.message);
 }
