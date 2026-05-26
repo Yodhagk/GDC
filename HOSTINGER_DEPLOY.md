@@ -13,31 +13,33 @@ Run on your local machine:
 ```bash
 node scripts/createDeployment.cjs
 ```
-This builds the project and creates `gdc-deploy.zip`.
+This verifies the local build compiles cleanly, then creates `gdc-deploy.zip` containing
+**source files only** (no pre-built `.next` or `node_modules`). The server builds fresh on
+Linux, which avoids Windows-path artifacts that cause TypeScript errors during Linux builds.
 
 ---
 
 ## 2. Upload to Hostinger
+
+### Via SCP (SSH)
+```bash
+scp gdc-deploy.zip username@your-server-ip:/home/username/gdc/
+ssh username@your-server-ip
+cd /home/username/gdc && unzip -o gdc-deploy.zip
+```
 
 ### Via Hostinger File Manager
 1. Log in to hPanel → **Files** → **File Manager**
 2. Navigate to `/home/<username>/domains/<yourdomain.com>/public_html`
 3. Upload `gdc-deploy.zip` and extract it
 
-### Via SCP (SSH)
-```bash
-scp gdc-deploy.zip username@your-server-ip:/home/username/gdc/
-ssh username@your-server-ip
-cd /home/username/gdc && unzip gdc-deploy.zip
-```
-
 ---
 
-## 3. Install Production Dependencies on Server
+## 3. Install Dependencies on Server
 
 ```bash
 cd /home/username/gdc
-npm install --omit=dev --legacy-peer-deps
+npm install --legacy-peer-deps
 ```
 
 ---
@@ -64,9 +66,29 @@ IT_SEED_PASSWORD=<strong_it_password>
 
 ---
 
-## 5. Initialize the Database
+## 5. Build the Application on the Server
 
 ```bash
+cd /home/username/gdc
+
+# If re-deploying: clear any stale build artifacts first
+rm -rf .next
+
+# Generate Prisma client and compile Next.js
+npm run build
+```
+
+The `npm run build` command runs `prisma generate` then the Next.js build.
+Building on the Linux server ensures `.next/types/` is generated for Linux paths,
+avoiding the TypeScript module-resolution errors that occur when a Windows-built
+`.next` is transferred to a Linux server.
+
+---
+
+## 6. Initialize the Database
+
+```bash
+cd /home/username/gdc
 npx prisma db push
 npx ts-node --compiler-options '{"module":"CommonJS"}' prisma/seed.ts
 ```
@@ -79,12 +101,12 @@ This creates:
 
 ---
 
-## 6. Start the Server
+## 7. Start the Server
 
 ### Using PM2 (recommended)
 ```bash
 npm install -g pm2
-pm2 start "node -r ./scripts/patchFs.cjs ./node_modules/next/dist/bin/next start" \
+pm2 start "next start" \
   --name gdc \
   --cwd /home/username/gdc
 pm2 save
@@ -102,7 +124,7 @@ After=network.target
 Type=simple
 User=username
 WorkingDirectory=/home/username/gdc
-ExecStart=/usr/bin/node -r ./scripts/patchFs.cjs ./node_modules/next/dist/bin/next start
+ExecStart=/usr/bin/npx next start
 Restart=on-failure
 Environment=NODE_ENV=production
 EnvironmentFile=/home/username/gdc/.env.local
@@ -117,7 +139,7 @@ sudo systemctl start gdc
 
 ---
 
-## 7. Configure Nginx Reverse Proxy
+## 8. Configure Nginx Reverse Proxy
 
 ```nginx
 server {
@@ -147,7 +169,7 @@ server {
 
 ---
 
-## 8. SSL Certificate (Free via Let's Encrypt)
+## 9. SSL Certificate (Free via Let's Encrypt)
 
 ```bash
 sudo apt install certbot python3-certbot-nginx
@@ -156,7 +178,7 @@ sudo certbot --nginx -d yourdomain.com -d www.yourdomain.com
 
 ---
 
-## 9. Post-Deployment Checklist
+## 10. Post-Deployment Checklist
 
 - [ ] Site loads at `https://yourdomain.com`
 - [ ] `/portal/login` → login with seeded admin account
@@ -175,6 +197,26 @@ sudo certbot --nginx -d yourdomain.com -d www.yourdomain.com
 | Client Portal | `/portal` | Registered clients |
 | Owner/Admin | `/admin` | priti@goldendollarconsulting.com |
 | IT Support | `/it-support` | IT support team |
+
+---
+
+## Re-deploying Updates
+
+When pushing an update:
+```bash
+# Local: generate a new ZIP
+node scripts/createDeployment.cjs
+
+# Server: upload and re-extract
+scp gdc-deploy.zip username@your-server-ip:/home/username/gdc/
+ssh username@your-server-ip
+cd /home/username/gdc
+unzip -o gdc-deploy.zip
+npm install --legacy-peer-deps
+rm -rf .next
+npm run build
+pm2 restart gdc
+```
 
 ---
 

@@ -2,7 +2,9 @@
 /**
  * Creates a deployable ZIP for Hostinger VPS / Node.js hosting.
  * Run: node scripts/createDeployment.cjs
- * Requires: npm install (to have the zip package available) or uses built-in archiving.
+ *
+ * Ships SOURCE files only — the server builds fresh on Linux to avoid
+ * Windows-path contamination in .next/types/ that breaks Linux TypeScript.
  */
 
 const { execSync } = require('child_process');
@@ -12,32 +14,38 @@ const fs = require('fs');
 const ROOT = path.resolve(__dirname, '..');
 const OUT = path.join(ROOT, 'gdc-deploy.zip');
 
-// Files / folders to include in the deployment package
+// Source files and folders to ship — server will run `npm run build` itself
 const INCLUDE = [
-  '.next',
-  'public',
-  'prisma',
-  'scripts',
+  'app',
+  'components',
+  'lib',
+  'types',
   'pages',
+  'prisma',
+  'public',
+  'scripts',
+  'middleware.ts',
   'package.json',
   'package-lock.json',
   'next.config.mjs',
   'tsconfig.json',
   'postcss.config.mjs',
   'tailwind.config.ts',
+  '.npmrc',
   'HOSTINGER_DEPLOY.md',
 ];
 
-console.log('🏗  Building production bundle...');
+// Verify local build compiles cleanly before packaging
+console.log('🔍 Verifying local build compiles cleanly...');
 try {
   execSync('npm run build', { cwd: ROOT, stdio: 'inherit' });
+  console.log('✅ Build verified clean.\n');
 } catch {
   console.error('❌ Build failed. Fix errors before packaging.');
   process.exit(1);
 }
 
-// Try using PowerShell's Compress-Archive on Windows, fallback to zip CLI
-console.log('\n📦 Creating deployment ZIP...');
+console.log('📦 Creating deployment ZIP (source files only)...');
 
 if (fs.existsSync(OUT)) fs.unlinkSync(OUT);
 
@@ -63,4 +71,6 @@ try {
 
 const size = (fs.statSync(OUT).size / 1024 / 1024).toFixed(1);
 console.log(`\n✅ Deployment package created: gdc-deploy.zip (${size} MB)`);
-console.log('📖 See HOSTINGER_DEPLOY.md for upload and configuration steps.');
+console.log('   Contains: source files only (no pre-built .next or node_modules)');
+console.log('   Server will run: npm install && npm run build && npm start');
+console.log('\n📖 See HOSTINGER_DEPLOY.md for full deployment steps.');
