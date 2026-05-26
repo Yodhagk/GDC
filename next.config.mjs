@@ -1,8 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: {
-    serverComponentsExternalPackages: ['bcryptjs', '@prisma/client', 'prisma'],
-  },
+  serverExternalPackages: ['bcryptjs', '@prisma/client', 'prisma'],
   images: {
     remotePatterns: [],
   },

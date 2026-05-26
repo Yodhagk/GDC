@@ -204,11 +204,6 @@
       "browserDebugInfoInTerminal": false,
       "optimizeRouterScrolling": false,
       "middlewareClientMaxBodySize": 10485760,
-      "serverComponentsExternalPackages": [
-        "bcryptjs",
-        "@prisma/client",
-        "prisma"
-      ],
       "optimizePackageImports": [
         "lucide-react",
         "date-fns",

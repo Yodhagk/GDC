@@ -8,12 +8,12 @@
   "/api/files/route": "/api/files",
   "/api/upload/route": "/api/upload",
   "/(marketing)/page": "/",
-  "/portal/login/page": "/portal/login",
   "/portal/page": "/portal",
+  "/portal/login/page": "/portal/login",
   "/portal/register/page": "/portal/register",
-  "/(marketing)/contact/page": "/contact",
+  "/admin/page": "/admin",
   "/(marketing)/services/page": "/services",
+  "/(marketing)/contact/page": "/contact",
   "/(marketing)/about/page": "/about",
-  "/it-support/page": "/it-support",
-  "/admin/page": "/admin"
+  "/it-support/page": "/it-support"
 }
