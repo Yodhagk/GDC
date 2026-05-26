@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "node -r ./scripts/patchFs.cjs ./node_modules/next/dist/bin/next dev",
+    "prebuild": "node scripts/fixPermissions.cjs",
     "build": "prisma generate && node -r ./scripts/patchFs.cjs ./node_modules/next/dist/bin/next build",
     "start": "next start",
     "lint": "next lint",
