@@ -1,0 +1,54 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --gold: #D4AF37;
+  --navy: #0B1F3A;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-inter), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5 {
+  font-family: var(--font-playfair), Georgia, serif;
+}
+
+@layer components {
+  .btn-gold {
+    @apply bg-gold-400 hover:bg-gold-500 text-navy-800 font-bold px-8 py-3.5 rounded-xl
+           transition-all duration-200 shadow-lg shadow-gold-400/25
+           hover:shadow-gold-400/40 hover:-translate-y-0.5 active:translate-y-0;
+  }
+
+  .btn-outline-gold {
+    @apply border-2 border-gold-400 text-gold-400 hover:bg-gold-400 hover:text-navy-800
+           font-semibold px-8 py-3.5 rounded-xl transition-all duration-200;
+  }
+
+  .btn-navy {
+    @apply bg-navy-800 hover:bg-navy-700 text-white font-bold px-8 py-3.5 rounded-xl
+           transition-all duration-200 shadow-lg hover:-translate-y-0.5;
+  }
+
+  .section-tag {
+    @apply inline-flex items-center gap-2 bg-gold-400/10 border border-gold-400/30
+           text-gold-500 text-xs font-semibold uppercase tracking-widest px-4 py-1.5 rounded-full;
+  }
+
+  .section-heading {
+    @apply font-serif text-4xl lg:text-5xl font-bold text-navy-800 leading-tight;
+  }
+
+  .card-service {
+    @apply bg-white rounded-2xl p-8 border border-gray-100 shadow-sm
+           hover:shadow-xl hover:border-gold-200 hover:-translate-y-1
+           transition-all duration-300 group;
+  }
+}
