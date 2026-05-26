@@ -1,11 +1,12 @@
 'use strict';
 /**
- * Creates a deployable ZIP for Hostinger VPS / Node.js hosting.
+ * Creates a deployable ZIP for Hostinger Node.js hosting.
  * Run: npm run deploy:zip
  *
- * Ships SOURCE files only — the server builds fresh on Linux.
- * Uses `archiver` to embed proper Unix permission bits (755 dirs, 644 files)
- * so extraction on Linux never triggers EACCES during Next.js build.
+ * Ships pre-built .next (excluding cache) + source files + Unix permissions.
+ * Hostinger shared hosting lacks resources to run `next build` on the server,
+ * so we build locally on Windows and ship the compiled output.
+ * Server only needs: npm install (for Linux Prisma binary) + prisma setup + npm start
  */
 
 const { execSync } = require('child_process');
@@ -16,12 +17,11 @@ const archiver = require('archiver');
 const ROOT = path.resolve(__dirname, '..');
 const OUT = path.join(ROOT, 'gdc-deploy.zip');
 
-// Source directories to include (server builds .next fresh on Linux)
-const DIRS = ['app', 'components', 'lib', 'types', 'pages', 'prisma', 'public', 'scripts'];
+// Source directories (needed for Prisma CLI, seed, scripts)
+const SOURCE_DIRS = ['prisma', 'public', 'scripts'];
 
-// Individual files to include
+// Individual source files
 const FILES = [
-  'middleware.ts',
   'package.json',
   'package-lock.json',
   'next.config.mjs',
@@ -32,11 +32,11 @@ const FILES = [
   'HOSTINGER_DEPLOY.md',
 ];
 
-// Verify local build compiles cleanly before packaging
-console.log('🔍 Verifying local build compiles cleanly...');
+// Build locally first to ensure .next is fresh and clean
+console.log('🏗  Building production bundle locally...');
 try {
   execSync('npm run build', { cwd: ROOT, stdio: 'inherit' });
-  console.log('✅ Build verified clean.\n');
+  console.log('✅ Build complete.\n');
 } catch {
   console.error('❌ Build failed. Fix errors before packaging.');
   process.exit(1);
@@ -56,19 +56,30 @@ async function createZip() {
     archive.on('error', reject);
     archive.pipe(output);
 
-    // Add each directory with mode bits stored in the ZIP
-    for (const dir of DIRS) {
-      const src = path.join(ROOT, dir);
-      if (!fs.existsSync(src)) continue;
-
-      archive.directory(src, dir, (entry) => {
-        // Directories: rwxr-xr-x (755), Files: rw-r--r-- (644)
+    // ── Pre-built .next (exclude cache — not needed at runtime) ──────────────
+    const nextDir = path.join(ROOT, '.next');
+    if (fs.existsSync(nextDir)) {
+      archive.directory(nextDir, '.next', (entry) => {
+        // Skip build cache — saves space, not needed for `next start`
+        if (entry.name && (entry.name === 'cache' || entry.name.startsWith('cache/'))) {
+          return false;
+        }
         entry.mode = entry.stats.isDirectory() ? 0o755 : 0o644;
         return entry;
       });
     }
 
-    // Add individual files
+    // ── Source directories (Prisma schema, seed, public assets, scripts) ─────
+    for (const dir of SOURCE_DIRS) {
+      const src = path.join(ROOT, dir);
+      if (!fs.existsSync(src)) continue;
+      archive.directory(src, dir, (entry) => {
+        entry.mode = entry.stats.isDirectory() ? 0o755 : 0o644;
+        return entry;
+      });
+    }
+
+    // ── Individual config files ───────────────────────────────────────────────
     for (const file of FILES) {
       const src = path.join(ROOT, file);
       if (!fs.existsSync(src)) continue;
@@ -83,9 +94,9 @@ createZip()
   .then(() => {
     const size = (fs.statSync(OUT).size / 1024 / 1024).toFixed(1);
     console.log(`\n✅ Deployment package created: gdc-deploy.zip (${size} MB)`);
+    console.log('   Contains: pre-built .next + source files (no node_modules)');
     console.log('   Unix permissions embedded: dirs=755, files=644');
-    console.log('   Contains: source files only (no pre-built .next or node_modules)');
-    console.log('   Server will run: npm install && npm run build && npm start');
+    console.log('   Server steps: npm install → prisma setup → npm start (NO build needed)');
     console.log('\n📖 See HOSTINGER_DEPLOY.md for full deployment steps.');
   })
   .catch((err) => {

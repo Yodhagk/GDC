@@ -42,6 +42,15 @@ cd /home/username/gdc
 npm install --legacy-peer-deps
 ```
 
+> This installs the **Linux-native Prisma binary** and all runtime dependencies.
+> The `.next` folder is pre-built and shipped in the ZIP — **no build step needed on the server**.
+
+## 3a. Generate Prisma Client (Linux version)
+
+```bash
+./node_modules/.bin/prisma generate
+```
+
 ---
 
 ## 4. Set Environment Variables
@@ -66,26 +75,7 @@ IT_SEED_PASSWORD=<strong_it_password>
 
 ---
 
-## 5. Build the Application on the Server
-
-```bash
-cd /home/username/gdc
-
-# If re-deploying: clear any stale build artifacts first
-rm -rf .next
-
-# Generate Prisma client and compile Next.js
-npm run build
-```
-
-The `npm run build` command runs `prisma generate` then the Next.js build.
-Building on the Linux server ensures `.next/types/` is generated for Linux paths,
-avoiding the TypeScript module-resolution errors that occur when a Windows-built
-`.next` is transferred to a Linux server.
-
----
-
-## 6. Initialize the Database
+## 5. Initialize the Database
 
 ```bash
 cd /home/username/gdc
@@ -101,7 +91,7 @@ This creates:
 
 ---
 
-## 7. Start the Server
+## 6. Start the Server
 
 ### Using PM2 (recommended)
 ```bash
