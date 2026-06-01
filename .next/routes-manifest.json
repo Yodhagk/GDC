@@ -26,6 +26,14 @@
         "nxtPnextauth": "nxtPnextauth"
       },
       "namedRegex": "^/api/auth/(?<nxtPnextauth>.+?)(?:/)?$"
+    },
+    {
+      "page": "/api/tickets/[id]",
+      "regex": "^/api/tickets/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/tickets/(?<nxtPid>[^/]+?)(?:/)?$"
     }
   ],
   "staticRoutes": [

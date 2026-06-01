@@ -16,4 +16,20 @@ model User {
   role       String   @default("client") // client | admin | it_support
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+  tickets    Ticket[]
+}
+
+model Ticket {
+  id         String   @id @default(cuid())
+  ticketNo   String   @unique // GDC-TKT-XXXXXX
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subject    String
+  category   String   // tax | immigration | company | technical | general
+  priority   String   @default("medium") // low | medium | high | urgent
+  status     String   @default("open")   // open | in_progress | resolved | closed
+  message    String
+  response   String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }

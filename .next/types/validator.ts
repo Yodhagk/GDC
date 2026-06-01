@@ -195,6 +195,24 @@ type ApiRouteConfig = {
   type __Unused = __Check
 }
 
+// Validate ../../app/api/tickets/[id]/route.ts
+{
+  type __IsExpected<Specific extends RouteHandlerConfig<"/api/tickets/[id]">> = Specific
+  const handler = {} as typeof import("../../app/api/tickets/[id]/route.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../app/api/tickets/route.ts
+{
+  type __IsExpected<Specific extends RouteHandlerConfig<"/api/tickets">> = Specific
+  const handler = {} as typeof import("../../app/api/tickets/route.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
 // Validate ../../app/api/upload/route.ts
 {
   type __IsExpected<Specific extends RouteHandlerConfig<"/api/upload">> = Specific
