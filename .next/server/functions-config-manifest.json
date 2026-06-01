@@ -1,9 +1,9 @@
 {
   "version": 1,
   "functions": {
-    "/api/admin/documents": {},
     "/api/files": {},
     "/api/files/download": {},
+    "/api/admin/documents": {},
     "/api/upload": {}
   }
 }

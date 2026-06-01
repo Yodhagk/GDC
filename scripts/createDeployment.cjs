@@ -33,6 +33,10 @@ const FILES = [
   'HOSTINGER_DEPLOY.md',
 ];
 
+// Delete BUILD_ID so smartBuild.cjs always runs a full local compile
+const BUILD_ID = path.join(ROOT, '.next', 'BUILD_ID');
+if (fs.existsSync(BUILD_ID)) fs.unlinkSync(BUILD_ID);
+
 // Build locally first to ensure .next is fresh and clean
 console.log('🏗  Building production bundle locally...');
 try {
