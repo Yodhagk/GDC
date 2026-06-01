@@ -1,11 +1,28 @@
-import { Dropbox } from 'dropbox';
+import { Dropbox, DropboxAuth } from 'dropbox';
 
 function getDropboxClient(): Dropbox {
-  const accessToken = process.env.DROPBOX_ACCESS_TOKEN;
-  if (!accessToken) {
-    throw new Error('DROPBOX_ACCESS_TOKEN environment variable is not set.');
+  const appKey     = process.env.DROPBOX_APP_KEY;
+  const appSecret  = process.env.DROPBOX_APP_SECRET;
+  const refreshToken = process.env.DROPBOX_REFRESH_TOKEN;
+  const accessToken  = process.env.DROPBOX_ACCESS_TOKEN; // short-lived fallback
+
+  // ── Production: refresh token (never expires) ────────────────────────────
+  if (appKey && appSecret && refreshToken) {
+    const auth = new DropboxAuth({ clientId: appKey, clientSecret: appSecret });
+    auth.setRefreshToken(refreshToken);
+    return new Dropbox({ auth });
   }
-  return new Dropbox({ accessToken, fetch });
+
+  // ── Development / testing: plain access token ────────────────────────────
+  if (accessToken) {
+    return new Dropbox({ accessToken });
+  }
+
+  throw new Error(
+    'Dropbox is not configured. Set in .env.local:\n' +
+    '  Production → DROPBOX_APP_KEY + DROPBOX_APP_SECRET + DROPBOX_REFRESH_TOKEN\n' +
+    '  Testing    → DROPBOX_ACCESS_TOKEN'
+  );
 }
 
 export async function uploadToDropbox(

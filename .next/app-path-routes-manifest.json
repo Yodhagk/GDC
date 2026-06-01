@@ -1,21 +1,21 @@
 {
   "/_not-found/page": "/_not-found",
-  "/api/admin/stats/route": "/api/admin/stats",
   "/api/admin/users/route": "/api/admin/users",
+  "/api/admin/stats/route": "/api/admin/stats",
   "/api/register/route": "/api/register",
-  "/api/files/route": "/api/files",
   "/api/admin/documents/route": "/api/admin/documents",
   "/api/files/download/route": "/api/files/download",
-  "/api/tickets/[id]/route": "/api/tickets/[id]",
+  "/api/files/route": "/api/files",
   "/api/tickets/route": "/api/tickets",
+  "/api/tickets/[id]/route": "/api/tickets/[id]",
   "/api/upload/route": "/api/upload",
   "/(marketing)/page": "/",
-  "/(marketing)/services/page": "/services",
   "/portal/login/page": "/portal/login",
-  "/portal/page": "/portal",
   "/portal/register/page": "/portal/register",
+  "/portal/page": "/portal",
   "/(marketing)/about/page": "/about",
   "/(marketing)/contact/page": "/contact",
-  "/it-support/page": "/it-support",
-  "/admin/page": "/admin"
+  "/admin/page": "/admin",
+  "/(marketing)/services/page": "/services",
+  "/it-support/page": "/it-support"
 }
