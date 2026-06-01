@@ -20,7 +20,7 @@ export default function Footer() {
               </div>
             </Link>
             <p className="text-white/55 text-sm leading-relaxed max-w-sm mb-6">
-              Your trusted partner for expert tax consulting, IRS compliance, and financial peace of mind.
+              Your trusted partner for expert tax consulting, immigration services, and company registrations.
               Serving individuals and businesses across all 50 states.
             </p>
             <div className="space-y-2.5">
@@ -51,9 +51,9 @@ export default function Footer() {
             <ul className="space-y-2.5">
               {[
                 'Tax Filing',
-                'IRS Compliance',
+                'Immigration',
                 'Bookkeeping',
-                'Audit Support',
+                'Company Registrations',
                 'Business Tax',
                 'Tax Planning',
               ].map((s) => (

@@ -6,8 +6,8 @@ import { ArrowRight, Shield, Users, Award, TrendingUp, Star, CheckCircle } from 
 const features = [
   {
     icon: Shield,
-    title: 'IRS Compliance',
-    desc: 'Full compliance with federal & state regulations',
+    title: 'Immigration Services',
+    desc: 'Visa, green card & citizenship guidance',
   },
   {
     icon: Users,

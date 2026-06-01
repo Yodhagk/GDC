@@ -16,7 +16,7 @@ const values = [
 
 const team = [
   { name: 'Priti Patel', role: 'Founder and CEO', exp: '22 years', initials: 'PP' },
-  { name: 'Maria Gonzalez, EA', role: 'IRS Compliance Director', exp: '16 years', initials: 'MG' },
+  { name: 'Maria Gonzalez', role: 'Immigration Specialist', exp: '16 years', initials: 'MG' },
   { name: 'Mona', role: 'Senior Tax Consultant', exp: '14 years', initials: 'MO' },
   { name: 'Priya Sharma, CPA', role: 'Business Tax Specialist', exp: '11 years', initials: 'PS' },
 ];

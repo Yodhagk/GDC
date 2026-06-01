@@ -1,19 +1,19 @@
 {
-  "/_not-found/page": "/_not-found",
-  "/api/admin/stats/route": "/api/admin/stats",
   "/api/admin/users/route": "/api/admin/users",
+  "/api/admin/stats/route": "/api/admin/stats",
   "/api/register/route": "/api/register",
+  "/_not-found/page": "/_not-found",
   "/api/admin/documents/route": "/api/admin/documents",
   "/api/files/download/route": "/api/files/download",
-  "/api/upload/route": "/api/upload",
   "/api/files/route": "/api/files",
+  "/api/upload/route": "/api/upload",
   "/(marketing)/page": "/",
-  "/portal/page": "/portal",
   "/portal/login/page": "/portal/login",
+  "/portal/page": "/portal",
   "/portal/register/page": "/portal/register",
+  "/(marketing)/contact/page": "/contact",
   "/(marketing)/about/page": "/about",
   "/(marketing)/services/page": "/services",
-  "/(marketing)/contact/page": "/contact",
-  "/it-support/page": "/it-support",
-  "/admin/page": "/admin"
+  "/admin/page": "/admin",
+  "/it-support/page": "/it-support"
 }

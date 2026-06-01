@@ -6,9 +6,9 @@ import toast from 'react-hot-toast';
 
 const services = [
   'Tax Filing',
-  'IRS Compliance',
+  'Immigration',
   'Bookkeeping',
-  'Audit Support',
+  'Company Registrations',
   'Business Tax Planning',
   'Other',
 ];

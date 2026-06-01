@@ -1,10 +1,10 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { FileText, ShieldCheck, BookOpen, Search, CheckCircle, ArrowRight } from 'lucide-react';
+import { FileText, Globe, BookOpen, Building2, CheckCircle, ArrowRight } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Our Services',
-  description: 'Explore the full range of tax consulting services at Golden Dollar Consultancy — from tax filing to IRS audit support.',
+  description: 'Explore the full range of services at Golden Dollar Consultancy — tax filing, immigration, bookkeeping, and company registrations.',
 };
 
 const services = [
@@ -25,18 +25,18 @@ const services = [
     color: 'navy',
   },
   {
-    id: 'irs-compliance',
-    icon: ShieldCheck,
-    title: 'IRS Compliance & Resolution',
-    subtitle: 'Expert IRS Representation',
-    desc: 'Receiving an IRS notice or facing back taxes is stressful. Our enrolled agents and tax attorneys handle every type of IRS issue, representing you with full practice rights at every level of the IRS.',
+    id: 'immigration',
+    icon: Globe,
+    title: 'Immigration Services',
+    subtitle: 'Visa, Green Card & Citizenship Support',
+    desc: 'Navigating U.S. immigration law is complex. Our experienced consultants guide individuals, families, and businesses through every step — from visa applications to green cards and citizenship — with accuracy and care.',
     features: [
-      'IRS notice response & correspondence',
-      'Back tax debt resolution',
-      'Penalty abatement & interest removal',
-      'Installment agreements',
-      'Offers in compromise',
-      'Innocent spouse relief',
+      'Visa applications (H-1B, L-1, O-1, EB series)',
+      'Green card & permanent residency filing',
+      'Citizenship & naturalization assistance',
+      'Family-based immigration petitions',
+      'Work authorization & EAD renewal',
+      'ITIN applications for non-residents',
     ],
     color: 'gold',
   },
@@ -57,18 +57,18 @@ const services = [
     color: 'navy',
   },
   {
-    id: 'audit-support',
-    icon: Search,
-    title: 'Audit Support & Defense',
-    subtitle: 'Full Audit Representation',
-    desc: 'A tax audit is one of the most stressful events a taxpayer can face. With Golden Dollar, you are never alone. We manage every step of the process — from initial response through appeals — protecting your rights and minimizing your exposure.',
+    id: 'company-registrations',
+    icon: Building2,
+    title: 'Company Registrations',
+    subtitle: 'Business Formation & Compliance',
+    desc: 'Starting a business in the U.S. requires the right structure from day one. We handle the full registration process — from choosing the right entity type to filing with state and federal agencies — so you can launch with confidence.',
     features: [
-      'IRS field & office audit representation',
-      'Correspondence audit response',
-      'State tax authority audits',
-      'Document gathering & organization',
-      'Appeals filing & negotiation',
-      'Tax court preparation (when needed)',
+      'LLC & corporation formation',
+      'EIN / Tax ID number application',
+      'Articles of incorporation filing',
+      'Registered agent services',
+      'Business license & permit guidance',
+      'Annual compliance filings',
     ],
     color: 'gold',
   },

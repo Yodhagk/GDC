@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { FileText, ShieldCheck, BookOpen, Search, ArrowRight } from 'lucide-react';
+import { FileText, Globe, BookOpen, Building2, ArrowRight } from 'lucide-react';
 
 const services = [
   {
@@ -12,10 +12,10 @@ const services = [
     iconColor: 'text-blue-600',
   },
   {
-    icon: ShieldCheck,
-    title: 'IRS Compliance',
-    desc: 'Expert representation and resolution services for IRS notices, audits, back taxes, and penalty abatement. We handle the IRS so you don\'t have to.',
-    items: ['IRS notice response', 'Penalty abatement', 'Installment agreements', 'Offer in compromise'],
+    icon: Globe,
+    title: 'Immigration',
+    desc: 'Expert guidance through U.S. immigration processes — from visa applications and green cards to citizenship and ITIN registration for non-residents.',
+    items: ['Visa applications (H-1B, L-1, O-1)', 'Green card & residency filing', 'Citizenship & naturalization', 'ITIN for non-residents'],
     color: 'from-gold-50 to-amber-50',
     iconBg: 'bg-gold-100',
     iconColor: 'text-gold-600',
@@ -30,10 +30,10 @@ const services = [
     iconColor: 'text-green-600',
   },
   {
-    icon: Search,
-    title: 'Audit Support',
-    desc: 'Comprehensive audit defense and representation for IRS and state tax authority examinations. We protect your rights and minimize your exposure.',
-    items: ['Audit representation', 'Document preparation', 'Appeals filing', 'Correspondence audit'],
+    icon: Building2,
+    title: 'Company Registrations',
+    desc: 'Full business formation and compliance services — from choosing the right entity to filing with state and federal agencies so you launch with confidence.',
+    items: ['LLC & corporation formation', 'EIN / Tax ID application', 'Articles of incorporation', 'Annual compliance filings'],
     color: 'from-purple-50 to-violet-50',
     iconBg: 'bg-purple-100',
     iconColor: 'text-purple-600',
@@ -51,8 +51,8 @@ export default function ServicesSection() {
             Comprehensive Tax & Financial Services
           </h2>
           <p className="text-gray-500 text-lg max-w-2xl mx-auto">
-            From simple tax returns to complex IRS negotiations, our team of credentialed
-            professionals covers every aspect of your financial needs.
+            From simple tax returns to immigration consulting and business formation,
+            our team of credentialed professionals covers every aspect of your needs.
           </p>
         </div>
 
