@@ -5,17 +5,17 @@
   "/api/register/route": "/api/register",
   "/api/admin/documents/route": "/api/admin/documents",
   "/api/files/download/route": "/api/files/download",
+  "/api/tickets/[id]/route": "/api/tickets/[id]",
   "/api/files/route": "/api/files",
   "/api/tickets/route": "/api/tickets",
-  "/api/tickets/[id]/route": "/api/tickets/[id]",
   "/api/upload/route": "/api/upload",
   "/(marketing)/page": "/",
   "/portal/login/page": "/portal/login",
   "/portal/register/page": "/portal/register",
-  "/portal/page": "/portal",
-  "/(marketing)/about/page": "/about",
   "/(marketing)/contact/page": "/contact",
-  "/admin/page": "/admin",
+  "/portal/page": "/portal",
   "/(marketing)/services/page": "/services",
-  "/it-support/page": "/it-support"
+  "/(marketing)/about/page": "/about",
+  "/it-support/page": "/it-support",
+  "/admin/page": "/admin"
 }

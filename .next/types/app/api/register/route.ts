@@ -1,4 +1,4 @@
-// File: D:\code\GDC\app\api\register\route.ts
+// File: C:\Users\tilak\OneDrive\Documents\GitHub\GDC\app\api\register\route.ts
 import * as entry from '../../../../../app/api/register/route.js'
 import type { NextRequest } from 'next/server.js'
 

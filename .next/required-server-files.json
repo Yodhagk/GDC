@@ -98,7 +98,7 @@
         "transform": "lodash/{{member}}"
       }
     },
-    "outputFileTracingRoot": "D:\\code\\GDC",
+    "outputFileTracingRoot": "C:\\Users\\tilak\\OneDrive\\Documents\\GitHub\\GDC",
     "experimental": {
       "useSkewCookie": false,
       "cacheLife": {
@@ -293,10 +293,10 @@
       "prisma"
     ],
     "turbopack": {
-      "root": "D:\\code\\GDC"
+      "root": "C:\\Users\\tilak\\OneDrive\\Documents\\GitHub\\GDC"
     }
   },
-  "appDir": "D:\\code\\GDC",
+  "appDir": "C:\\Users\\tilak\\OneDrive\\Documents\\GitHub\\GDC",
   "relativeAppDir": "",
   "files": [
     ".next\\routes-manifest.json",

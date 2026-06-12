@@ -1,4 +1,4 @@
-// File: D:\code\GDC\app\api\tickets\[id]\route.ts
+// File: C:\Users\tilak\OneDrive\Documents\GitHub\GDC\app\api\tickets\[id]\route.ts
 import * as entry from '../../../../../../app/api/tickets/[id]/route.js'
 import type { NextRequest } from 'next/server.js'
 

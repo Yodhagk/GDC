@@ -1,4 +1,4 @@
-// File: D:\code\GDC\app\(marketing)\services\page.tsx
+// File: C:\Users\tilak\OneDrive\Documents\GitHub\GDC\app\(marketing)\services\page.tsx
 import * as entry from '../../../../../app/(marketing)/services/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

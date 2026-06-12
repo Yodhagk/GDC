@@ -16,7 +16,7 @@ try {
   execSync('chmod -R a+rX . 2>/dev/null || true', { stdio: 'inherit', shell: true, cwd: process.cwd() });
   // Restrict file read to owner+group only for .env files (extra safety)
   execSync('find . -maxdepth 1 -name ".env*" -exec chmod 600 {} + 2>/dev/null || true', { stdio: 'inherit', shell: true });
-  console.log('✅ Permissions ready.');
+  console.log('[READY] Permissions ready.');
 } catch (e) {
-  console.warn('⚠️  chmod warning (non-fatal):', e.message);
+  console.warn('[WARNING]  chmod warning (non-fatal):', e.message);
 }

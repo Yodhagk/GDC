@@ -28,7 +28,7 @@ env:
   SSH_HOST: 5.183.10.106
   SSH_PORT: 65002
   SSH_USER: u469500580
-  APP_DIR:  ~/gdc-app
+  APP_DIR:  ~/domains/goldendollarconsulting.com/nodejs
 
 jobs:
   deploy:
@@ -97,25 +97,31 @@ jobs:
             "$SSH_USER@$SSH_HOST" bash << 'REMOTE'
           set -e
 
-          APP_DIR="$HOME/gdc-app"
+          APP_DIR="$HOME/domains/goldendollarconsulting.com/nodejs"
           ZIP="$HOME/gdc-deploy.zip"
 
           echo "──────────────────────────────────────────"
           echo " GDC Deploy  $(date '+%Y-%m-%d %H:%M:%S')"
+          echo " Target: $APP_DIR"
           echo "──────────────────────────────────────────"
 
-          # Backup current app so we can roll back if needed
-          if [ -d "$APP_DIR" ]; then
-            echo ">>> Backing up current deployment..."
-            rm -rf "${APP_DIR}_bak"
-            mv "$APP_DIR" "${APP_DIR}_bak"
-          fi
+          # Preserve .env files — they live on the server and must not be wiped
+          echo ">>> Preserving .env files..."
+          mkdir -p /tmp/gdc-env-backup
+          cp "$APP_DIR/.env" /tmp/gdc-env-backup/.env 2>/dev/null || true
+          cp "$APP_DIR/.env.local" /tmp/gdc-env-backup/.env.local 2>/dev/null || true
 
-          # Extract new build
-          echo ">>> Extracting new deployment..."
+          # Extract new build directly into app dir (unzip -o overwrites files)
+          echo ">>> Extracting new deployment into $APP_DIR..."
           mkdir -p "$APP_DIR"
           unzip -o "$ZIP" -d "$APP_DIR"
           cd "$APP_DIR"
+
+          # Restore .env files
+          echo ">>> Restoring .env files..."
+          cp /tmp/gdc-env-backup/.env "$APP_DIR/.env" 2>/dev/null || true
+          cp /tmp/gdc-env-backup/.env.local "$APP_DIR/.env.local" 2>/dev/null || true
+          rm -rf /tmp/gdc-env-backup
 
           # Install Linux-native production packages (Prisma needs Linux binary)
           echo ">>> Installing production dependencies..."
@@ -129,26 +135,11 @@ jobs:
           echo ">>> Running DB migrations..."
           npx prisma migrate deploy 2>&1 | tail -4 || true
 
-          # Restart application — always delete + recreate so cwd/env are fresh
-          echo ">>> Restarting application..."
-          if command -v pm2 &>/dev/null; then
-            pm2 delete gdc 2>/dev/null || true
-            pm2 start npm --name gdc -- start \
-              --cwd "$APP_DIR" \
-              --update-env
-            pm2 save --force
-            pm2 status gdc
-          else
-            # Kill every node process that might be running the old app
-            pkill -f "next start" 2>/dev/null || true
-            pkill -f "node server.js" 2>/dev/null || true
-            pkill -f "npm start" 2>/dev/null || true
-            sleep 2
-            cd "$APP_DIR"
-            nohup npm start >> "$HOME/gdc.log" 2>&1 &
-            disown
-            echo "App started in background. Log: ~/gdc.log"
-          fi
+          # Restart via LiteSpeed (Hostinger) — touch tmp/restart.txt
+          echo ">>> Triggering LiteSpeed Node.js restart..."
+          mkdir -p "$APP_DIR/tmp"
+          touch "$APP_DIR/tmp/restart.txt"
+          echo "    ✓ restart.txt touched — LiteSpeed will reload the app"
 
           # Clean up uploaded ZIP
           rm -f "$ZIP"
