@@ -1,18 +1,18 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowRight, Shield, Users, Award, TrendingUp, Star, CheckCircle } from 'lucide-react';
+import { ArrowRight, Shield, Building2, Award, TrendingUp, Star, CheckCircle } from 'lucide-react';
 
 const features = [
   {
     icon: Shield,
-    title: 'USA VISA',
+    title: 'Immigration Services',
     desc: 'Visa, green card & citizenship guidance',
   },
   {
-    icon: Users,
-    title: 'Dedicated Advisors',
-    desc: 'Personal CPA assigned to every account',
+    icon: Building2,
+    title: 'Company Formation',
+    desc: 'LLC, corporation & EIN registration',
   },
   {
     icon: Award,
