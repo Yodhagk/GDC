@@ -1,0 +1,153 @@
+# ─────────────────────────────────────────────────────────────────────────────
+#  Auto-deploy to Hostinger on every push to main
+#
+#  Required GitHub Secrets (Settings → Secrets and variables → Actions):
+#    HOSTINGER_SSH_PASS   — SSH password: deltaDragon@786
+#    DATABASE_URL         — e.g. file:./prod.db  or  mysql://...
+#    NEXTAUTH_SECRET      — random 32-char string
+#    NEXTAUTH_URL         — https://yourdomain.com
+#    DROPBOX_APP_KEY      — from Dropbox developer console
+#    DROPBOX_APP_SECRET   — from Dropbox developer console
+#    DROPBOX_REFRESH_TOKEN
+#    SMTP_HOST            — smtp.office365.com
+#    SMTP_PORT            — 587
+#    SMTP_USER            — priti@goldendollarconsulting.com
+#    SMTP_PASS            — Outlook app password
+#    SMTP_FROM            — "Golden Dollar Consultancy <priti@goldendollarconsulting.com>"
+#    SUPPORT_EMAIL        — itsupport@goldendollarconsulting.com
+# ─────────────────────────────────────────────────────────────────────────────
+
+name: 🚀 Deploy to Hostinger
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:        # allow manual trigger from GitHub UI
+
+env:
+  SSH_HOST: 5.183.10.106
+  SSH_PORT: 65002
+  SSH_USER: u469500580
+  APP_DIR:  ~/gdc-app
+
+jobs:
+  deploy:
+    name: Build & Deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      # ── 1. Checkout ────────────────────────────────────────────────────────
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ── 2. Node.js setup ───────────────────────────────────────────────────
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      # ── 3. Install dependencies ────────────────────────────────────────────
+      - name: Install dependencies
+        run: npm ci
+
+      # ── 4. Build + package (createDeployment.cjs runs `npm run build` + zip)
+      - name: Build & create deployment ZIP
+        run: node scripts/createDeployment.cjs
+        env:
+          DATABASE_URL:          ${{ secrets.DATABASE_URL }}
+          NEXTAUTH_SECRET:       ${{ secrets.NEXTAUTH_SECRET }}
+          NEXTAUTH_URL:          ${{ secrets.NEXTAUTH_URL }}
+          DROPBOX_APP_KEY:       ${{ secrets.DROPBOX_APP_KEY }}
+          DROPBOX_APP_SECRET:    ${{ secrets.DROPBOX_APP_SECRET }}
+          DROPBOX_REFRESH_TOKEN: ${{ secrets.DROPBOX_REFRESH_TOKEN }}
+          SMTP_HOST:             ${{ secrets.SMTP_HOST }}
+          SMTP_PORT:             ${{ secrets.SMTP_PORT }}
+          SMTP_USER:             ${{ secrets.SMTP_USER }}
+          SMTP_PASS:             ${{ secrets.SMTP_PASS }}
+          SMTP_FROM:             ${{ secrets.SMTP_FROM }}
+          SUPPORT_EMAIL:         ${{ secrets.SUPPORT_EMAIL }}
+
+      # ── 5. Install sshpass on the runner ───────────────────────────────────
+      - name: Install sshpass
+        run: sudo apt-get install -y sshpass
+
+      # ── 6. Upload ZIP to Hostinger via SCP ─────────────────────────────────
+      - name: Upload gdc-deploy.zip to server
+        env:
+          SSH_PASS: ${{ secrets.HOSTINGER_SSH_PASS }}
+        run: |
+          sshpass -p "$SSH_PASS" scp \
+            -P "$SSH_PORT" \
+            -o StrictHostKeyChecking=no \
+            -o ConnectTimeout=30 \
+            gdc-deploy.zip \
+            "$SSH_USER@$SSH_HOST:~/gdc-deploy.zip"
+
+      # ── 7. Deploy on the Hostinger server ──────────────────────────────────
+      - name: Deploy on Hostinger
+        env:
+          SSH_PASS: ${{ secrets.HOSTINGER_SSH_PASS }}
+        run: |
+          sshpass -p "$SSH_PASS" ssh \
+            -p "$SSH_PORT" \
+            -o StrictHostKeyChecking=no \
+            -o ConnectTimeout=30 \
+            "$SSH_USER@$SSH_HOST" bash << 'REMOTE'
+          set -e
+
+          APP_DIR="$HOME/gdc-app"
+          ZIP="$HOME/gdc-deploy.zip"
+
+          echo "──────────────────────────────────────────"
+          echo " GDC Deploy  $(date '+%Y-%m-%d %H:%M:%S')"
+          echo "──────────────────────────────────────────"
+
+          # Backup current app so we can roll back if needed
+          if [ -d "$APP_DIR" ]; then
+            echo ">>> Backing up current deployment..."
+            rm -rf "${APP_DIR}_bak"
+            mv "$APP_DIR" "${APP_DIR}_bak"
+          fi
+
+          # Extract new build
+          echo ">>> Extracting new deployment..."
+          mkdir -p "$APP_DIR"
+          unzip -o "$ZIP" -d "$APP_DIR"
+          cd "$APP_DIR"
+
+          # Install Linux-native production packages (Prisma needs Linux binary)
+          echo ">>> Installing production dependencies..."
+          npm install --omit=dev --no-optional 2>&1 | tail -8
+
+          # Generate Prisma client for Linux
+          echo ">>> Generating Prisma client..."
+          npx prisma generate 2>&1 | tail -4
+
+          # Run any pending DB migrations
+          echo ">>> Running DB migrations..."
+          npx prisma migrate deploy 2>&1 | tail -4 || true
+
+          # Restart application
+          echo ">>> Restarting application..."
+          if command -v pm2 &>/dev/null; then
+            pm2 restart gdc 2>/dev/null \
+              || pm2 start npm --name gdc -- start
+            pm2 save
+            pm2 status gdc
+          else
+            pkill -f "next start" 2>/dev/null || true
+            sleep 2
+            nohup npm start >> "$HOME/gdc.log" 2>&1 &
+            disown
+            echo "App started in background. Log: ~/gdc.log"
+          fi
+
+          # Clean up uploaded ZIP
+          rm -f "$ZIP"
+
+          echo "──────────────────────────────────────────"
+          echo " ✅ Deployment complete!"
+          echo "──────────────────────────────────────────"
+          REMOTE

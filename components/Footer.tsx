@@ -51,9 +51,9 @@ export default function Footer() {
             <ul className="space-y-2.5">
               {[
                 'Tax Filing',
-                'Immigration',
+                'USA VISA',
                 'Bookkeeping',
-                'Company Registrations',
+                'Startup Company Registration',
                 'Business Tax',
                 'Tax Planning',
               ].map((s) => (

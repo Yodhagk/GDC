@@ -41,9 +41,9 @@ if (fs.existsSync(BUILD_ID)) fs.unlinkSync(BUILD_ID);
 console.log('🏗  Building production bundle locally...');
 try {
   execSync('npm run build', { cwd: ROOT, stdio: 'inherit' });
-  console.log('✅ Build complete.\n');
+  console.log('[READY] Build complete.\n');
 } catch {
-  console.error('❌ Build failed. Fix errors before packaging.');
+  console.error('[FAILED] Build failed. Fix errors before packaging.');
   process.exit(1);
 }
 
@@ -98,13 +98,13 @@ async function createZip() {
 createZip()
   .then(() => {
     const size = (fs.statSync(OUT).size / 1024 / 1024).toFixed(1);
-    console.log(`\n✅ Deployment package created: gdc-deploy.zip (${size} MB)`);
-    console.log('   Contains: pre-built .next + source files (no node_modules)');
-    console.log('   Unix permissions embedded: dirs=755, files=644');
-    console.log('   Server steps: npm install → prisma setup → npm start (NO build needed)');
-    console.log('\n📖 See HOSTINGER_DEPLOY.md for full deployment steps.');
+    console.log(`\n[READY] Deployment package created: gdc-deploy.zip (${size} MB)`);
+    console.log('Contains: pre-built .next + source files (no node_modules)');
+    console.log('[READY] Unix permissions embedded: dirs=755, files=644');
+    console.log('[READY] Server steps: npm install → prisma setup → npm start (NO build needed)');
+    console.log('\n[INFO] See HOSTINGER_DEPLOY.md for full deployment steps.');
   })
   .catch((err) => {
-    console.error('❌ ZIP creation failed:', err.message);
+    console.error('[FAILED] ZIP creation failed:', err.message);
     process.exit(1);
   });

@@ -27,7 +27,7 @@ const services = [
   {
     id: 'immigration',
     icon: Globe,
-    title: 'Immigration Services',
+    title: 'USA VISA',
     subtitle: 'Visa, Green Card & Citizenship Support',
     desc: 'Navigating U.S. immigration law is complex. Our experienced consultants guide individuals, families, and businesses through every step — from visa applications to green cards and citizenship — with accuracy and care.',
     features: [
@@ -59,7 +59,7 @@ const services = [
   {
     id: 'company-registrations',
     icon: Building2,
-    title: 'Company Registrations',
+    title: 'Startup Company Registration',
     subtitle: 'Business Formation & Compliance',
     desc: 'Starting a business in the U.S. requires the right structure from day one. We handle the full registration process — from choosing the right entity type to filing with state and federal agencies — so you can launch with confidence.',
     features: [
