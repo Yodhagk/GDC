@@ -129,16 +129,22 @@ jobs:
           echo ">>> Running DB migrations..."
           npx prisma migrate deploy 2>&1 | tail -4 || true
 
-          # Restart application
+          # Restart application — always delete + recreate so cwd/env are fresh
           echo ">>> Restarting application..."
           if command -v pm2 &>/dev/null; then
-            pm2 restart gdc 2>/dev/null \
-              || pm2 start npm --name gdc -- start
-            pm2 save
+            pm2 delete gdc 2>/dev/null || true
+            pm2 start npm --name gdc -- start \
+              --cwd "$APP_DIR" \
+              --update-env
+            pm2 save --force
             pm2 status gdc
           else
+            # Kill every node process that might be running the old app
             pkill -f "next start" 2>/dev/null || true
+            pkill -f "node server.js" 2>/dev/null || true
+            pkill -f "npm start" 2>/dev/null || true
             sleep 2
+            cd "$APP_DIR"
             nohup npm start >> "$HOME/gdc.log" 2>&1 &
             disown
             echo "App started in background. Log: ~/gdc.log"
