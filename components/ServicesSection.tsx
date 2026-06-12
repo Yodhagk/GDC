@@ -1,3 +1,5 @@
+'use client';
+
 import Link from 'next/link';
 import { FileText, Globe, BookOpen, Building2, ArrowRight } from 'lucide-react';
 
