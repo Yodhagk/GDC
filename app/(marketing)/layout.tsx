@@ -3,10 +3,10 @@ import Footer from '@/components/Footer';
 
 export default function MarketingLayout({ children }: { children: React.ReactNode }) {
   return (
-    <>
+    <div style={{ background: '#040B18', minHeight: '100vh' }}>
       <Navbar />
-      <main>{children}</main>
+      {children}
       <Footer />
-    </>
+    </div>
   );
 }

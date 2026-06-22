@@ -16,14 +16,15 @@ html { scroll-behavior: smooth; }
 body {
   font-family: var(--font-inter), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
-  background-color: #ffffff;
+  background-color: #040B18;
+  color: #ffffff;
 }
 
 h1, h2, h3, h4, h5 {
   font-family: var(--font-playfair), Georgia, serif;
 }
 
-/* ─── Shimmer keyframe (drives btn-gold glow sweep) ─────────────────────── */
+/* ─── Keyframes ──────────────────────────────────────────────────────────── */
 @keyframes shimmer {
   0%   { background-position: 200% center; }
   100% { background-position: -200% center; }
@@ -31,7 +32,32 @@ h1, h2, h3, h4, h5 {
 
 @keyframes glowPulse {
   0%, 100% { box-shadow: 0 0 20px 0 rgba(200,146,14,0.30); }
-  50%       { box-shadow: 0 0 40px 8px rgba(200,146,14,0.55); }
+  50%       { box-shadow: 0 0 50px 10px rgba(200,146,14,0.55); }
+}
+
+@keyframes spin {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to   { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-12px); }
+}
+
+@keyframes gradientShift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Respect reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 /* ─── Component layer ────────────────────────────────────────────────────── */
@@ -40,7 +66,7 @@ h1, h2, h3, h4, h5 {
   /* Primary gold CTA — metallic shimmer sweep */
   .btn-gold {
     @apply relative overflow-hidden font-bold px-8 py-3.5 rounded-xl
-           text-navy-900 transition-all duration-300
+           transition-all duration-300
            hover:-translate-y-0.5 active:translate-y-0;
     background: linear-gradient(
       110deg,
@@ -52,15 +78,22 @@ h1, h2, h3, h4, h5 {
     );
     background-size: 200% auto;
     animation: shimmer 4s linear infinite;
-    box-shadow: 0 6px 20px -4px rgba(200,146,14,0.50);
+    color: #040B18;
+    box-shadow: 0 6px 24px -4px rgba(200,146,14,0.55);
   }
   .btn-gold:hover {
-    box-shadow: 0 10px 30px -6px rgba(200,146,14,0.65);
+    box-shadow: 0 12px 36px -6px rgba(200,146,14,0.70);
   }
 
   .btn-outline-gold {
-    @apply border-2 border-gold-400 text-gold-400 hover:bg-gold-400 hover:text-navy-900
-           font-semibold px-8 py-3.5 rounded-xl transition-all duration-200;
+    @apply border-2 font-semibold px-8 py-3.5 rounded-xl transition-all duration-200;
+    border-color: rgba(200,146,14,0.5);
+    color: #E8C040;
+    background: rgba(200,146,14,0.05);
+  }
+  .btn-outline-gold:hover {
+    background: rgba(200,146,14,0.12);
+    border-color: rgba(200,146,14,0.7);
   }
 
   .btn-navy {
@@ -71,32 +104,32 @@ h1, h2, h3, h4, h5 {
 
   /* Section label chip */
   .section-tag {
-    @apply inline-flex items-center gap-2 bg-gold-400/10 border border-gold-400/30
-           text-gold-400 text-xs font-semibold uppercase tracking-widest
+    @apply inline-flex items-center gap-2 border
+           text-xs font-semibold uppercase tracking-widest
            px-4 py-1.5 rounded-full;
+    background: rgba(200,146,14,0.10);
+    border-color: rgba(200,146,14,0.30);
+    color: #E8C040;
   }
 
-  /* Section headings — navy with optional gold accent span */
+  /* Section headings */
   .section-heading {
-    @apply font-serif text-4xl lg:text-5xl font-bold text-navy-800 leading-tight;
+    @apply font-serif text-4xl lg:text-5xl font-bold leading-tight;
+    color: #ffffff;
   }
 
-  /* Standard service card */
-  .card-service {
-    @apply bg-white rounded-2xl p-8 border border-gray-100
-           hover:border-gold-400/40 hover:-translate-y-1
-           transition-all duration-300 group;
-    box-shadow: 0 2px 12px -3px rgba(7,18,40,0.08);
-  }
-  .card-service:hover {
-    box-shadow: 0 16px 40px -8px rgba(7,18,40,0.14), 0 4px 12px -4px rgba(200,146,14,0.15);
-  }
-
-  /* Luxury glass card (used on dark backgrounds) */
+  /* Luxury glass card (dark backgrounds) */
   .card-glass {
-    @apply bg-white/5 backdrop-blur border border-white/10 rounded-2xl p-6
-           hover:border-gold-400/30 hover:bg-white/10
-           transition-all duration-300;
+    @apply relative rounded-2xl p-6 transition-all duration-300;
+    background: rgba(255,255,255,0.04);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+  .card-glass:hover {
+    background: rgba(255,255,255,0.07);
+    border-color: rgba(200,146,14,0.25);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    transform: translateY(-3px);
   }
 
   /* Gold gradient text */
@@ -112,20 +145,50 @@ h1, h2, h3, h4, h5 {
     @apply border-0 h-px;
     background: linear-gradient(90deg, transparent 0%, rgba(200,146,14,0.5) 50%, transparent 100%);
   }
+
+  /* Glassmorphism card */
+  .glass-card {
+    background: rgba(255,255,255,0.04);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px;
+  }
 }
 
 /* ─── Utility overrides ──────────────────────────────────────────────────── */
 @layer utilities {
   .bg-cream { background-color: var(--cream); }
 
-  /* Warm cream section background */
-  .bg-section-warm {
-    background: linear-gradient(180deg, #FDFAF5 0%, #FAF4E8 100%);
-  }
+  .bg-dark-primary  { background: #040B18; }
+  .bg-dark-secondary { background: #071228; }
 
-  /* Subtle gold border on dark cards */
+  /* Subtle gold border glow */
   .border-gold-glow {
     border-color: rgba(200,146,14,0.35);
     box-shadow: 0 0 0 1px rgba(200,146,14,0.10) inset;
   }
+
+  /* Premium section separators */
+  .section-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(200,146,14,0.20), transparent);
+  }
+}
+
+/* ─── Scrollbar styling ──────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #040B18; }
+::-webkit-scrollbar-thumb {
+  background: rgba(200,146,14,0.30);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(200,146,14,0.50);
+}
+
+/* ─── Selection color ────────────────────────────────────────────────────── */
+::selection {
+  background: rgba(200,146,14,0.30);
+  color: #ffffff;
 }
