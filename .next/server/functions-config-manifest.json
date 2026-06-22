@@ -1,11 +1,11 @@
 {
   "version": 1,
   "functions": {
-    "/api/admin/documents": {},
+    "/api/tickets": {},
     "/api/files/download": {},
-    "/api/upload": {},
-    "/api/tickets/[id]": {},
     "/api/files": {},
-    "/api/tickets": {}
+    "/api/admin/documents": {},
+    "/api/tickets/[id]": {},
+    "/api/upload": {}
   }
 }

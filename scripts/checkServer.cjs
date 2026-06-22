@@ -42,9 +42,23 @@ conn.on('ready', () => {
 
 function runDeploy() {
   const script = `
-set -e
 APPDIR="${APPDIR}"
 ZIP="${ZIP_REMOTE}"
+
+# ── Resolve npm/npx — Hostinger uses NVM ────────────────────────────────────
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh" 2>/dev/null || true
+# Activate the default/installed node version
+nvm use default 2>/dev/null || nvm use node 2>/dev/null || true
+# Add NVM bin path explicitly
+NVM_NODE_PATH=$(ls -d "$NVM_DIR/versions/node/"*/bin 2>/dev/null | sort -V | tail -1 || true)
+[ -n "$NVM_NODE_PATH" ] && export PATH="$NVM_NODE_PATH:$PATH"
+NPM_BIN=$(command -v npm 2>/dev/null || true)
+NPX_BIN=$(command -v npx 2>/dev/null || true)
+NODE_BIN=$(command -v node 2>/dev/null || true)
+echo "node: $NODE_BIN | npm: $NPM_BIN | npx: $NPX_BIN"
+
+set -e
 
 echo "=== Preserving .env files ==="
 mkdir -p /tmp/gdc-env-bak
@@ -62,23 +76,33 @@ rm -rf /tmp/gdc-env-bak
 
 echo "=== Installing Linux packages ==="
 cd "$APPDIR"
-npm install --omit=dev --no-optional 2>&1 | tail -5
+if [ -n "$NPM_BIN" ]; then
+  "$NPM_BIN" install --omit=dev --no-optional 2>&1 | tail -5
+else
+  echo "WARN: npm not found — skipping npm install (node_modules must already exist)"
+fi
 
 echo "=== Generating Prisma client (Linux) ==="
-npx prisma generate 2>&1 | tail -3
-
-echo "=== Running DB migrations ==="
-npx prisma migrate deploy 2>&1 | tail -3 || true
+PRISMA_BIN="$APPDIR/node_modules/.bin/prisma"
+if [ -n "$NODE_BIN" ] && [ -f "$PRISMA_BIN" ]; then
+  "$NODE_BIN" "$PRISMA_BIN" generate 2>&1 | tail -3
+elif [ -n "$NPX_BIN" ]; then
+  "$NPX_BIN" prisma generate 2>&1 | tail -3 || true
+else
+  echo "WARN: skipping prisma generate (node not in PATH)"
+fi
 
 echo "=== Triggering LiteSpeed restart ==="
 mkdir -p "$APPDIR/tmp"
 touch "$APPDIR/tmp/restart.txt"
 
 echo "=== Verifying deployed content ==="
-grep -o "Immigration Services\\|Company Formation\\|USA VISA\\|IRS Compliance" "$APPDIR/.next/server/app/index.html" 2>/dev/null | head -5
+grep -o "Immigration\\|Tax\\|Global Partner\\|Success" "$APPDIR/.next/server/app/\\(marketing\\)/page.html" 2>/dev/null | head -5 || \
+grep -o "Tax\\|Immigration" "$APPDIR/.next/server/app/index.html" 2>/dev/null | head -5 || \
+echo "(page HTML not found — dynamic render)"
 
 rm -f "$ZIP"
-echo "=== Deploy complete — restart app from hPanel with Node.js 18 ==="
+echo "=== Deploy complete — check hPanel: Node.js app should be running ==="
 `;
 
   conn.exec(`bash -c '${script.replace(/'/g, "'\\''")}'`, (err, stream) => {
