@@ -7,8 +7,8 @@ import { Users, ThumbsUp, Clock, Globe } from 'lucide-react';
 const stats = [
   { icon: Users,     value: 5000, suffix: '+', label: 'Successful Cases',  desc: 'Across tax, immigration & business' },
   { icon: ThumbsUp,  value: 98,   suffix: '%', label: 'Approval Rate',     desc: 'Industry-leading success record' },
-  { icon: Clock,     value: 15,   suffix: '+', label: 'Years Experience',   desc: 'Since 2009, trusted worldwide' },
-  { icon: Globe,     value: 30,   suffix: '+', label: 'Countries Served',   desc: 'Global reach, local expertise' },
+  { icon: Clock,     value: 15,   suffix: '+', label: 'Years Experience',   desc: 'Since 2009, trusted across the USA' },
+  { icon: Globe,     value: 50,   suffix: '+', label: 'US States Served',   desc: 'Nationwide reach, Georgia roots' },
 ];
 
 function AnimatedCounter({ target, suffix, inView }: { target: number; suffix: string; inView: boolean }) {
@@ -84,7 +84,7 @@ export default function TrustStats() {
             }}> Speak for Themselves</span>
           </h2>
           <p className="text-lg max-w-xl mx-auto" style={{ color: 'rgba(255,255,255,0.45)' }}>
-            Fifteen years of delivering exceptional outcomes for clients across the globe.
+            Fifteen years of delivering exceptional outcomes for clients across Georgia and the USA.
           </p>
         </motion.div>
 

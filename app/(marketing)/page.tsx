@@ -13,7 +13,7 @@ const BASE = 'https://goldendollarconsulting.com';
 
 export const metadata: Metadata = {
   title: 'Tax & Immigration Consultant USA | 5,000+ Clients | Free Consultation',
-  description: 'Golden Dollar Consultancy — IRS-enrolled agents offering tax filing, US immigration, H-1B visa, business registration & bookkeeping. Serving 30+ countries. Free consultation.',
+  description: 'Golden Dollar Consultancy — IRS-enrolled agents offering tax filing, US immigration, H-1B visa, business registration & bookkeeping. Serving Atlanta, GA & nationwide. Free consultation.',
   alternates: { canonical: BASE },
   openGraph: {
     url: BASE,

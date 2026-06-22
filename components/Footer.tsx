@@ -38,8 +38,8 @@ export default function Footer() {
               </div>
             </Link>
             <p className="text-sm leading-relaxed max-w-sm mb-6" style={{ color: 'rgba(255,255,255,0.40)' }}>
-              Your trusted global partner for expert tax consulting, immigration services, and business compliance.
-              Serving professionals and families in 30+ countries.
+              Atlanta&apos;s trusted expert for tax consulting, US immigration services, and business compliance.
+              Headquartered in Lilburn, GA — serving clients nationwide.
             </p>
             <div className="space-y-3">
               <a href="tel:+14692699784" className="flex items-center gap-3 text-sm transition-colors cursor-pointer"

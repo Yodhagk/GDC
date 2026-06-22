@@ -1,0 +1,16 @@
+User-Agent: *
+Allow: /
+Disallow: /admin
+Disallow: /portal
+Disallow: /api/
+Disallow: /it-support
+
+User-Agent: Googlebot
+Allow: /
+Disallow: /admin
+Disallow: /portal
+Disallow: /api/
+Disallow: /it-support
+
+Host: https://goldendollarconsulting.com
+Sitemap: https://goldendollarconsulting.com/sitemap.xml

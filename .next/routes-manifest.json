@@ -1,0 +1,277 @@
+{
+  "version": 3,
+  "pages404": true,
+  "caseSensitive": false,
+  "basePath": "",
+  "redirects": [
+    {
+      "source": "/:path+/",
+      "destination": "/:path+",
+      "internal": true,
+      "statusCode": 308,
+      "regex": "^(?:/((?:[^/]+?)(?:/(?:[^/]+?))*))/$"
+    },
+    {
+      "source": "/services/",
+      "destination": "/services",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/services/(?:/)?$"
+    },
+    {
+      "source": "/about/",
+      "destination": "/about",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/about/(?:/)?$"
+    },
+    {
+      "source": "/contact/",
+      "destination": "/contact",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/contact/(?:/)?$"
+    },
+    {
+      "source": "/blog/",
+      "destination": "/blog",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/blog/(?:/)?$"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Frame-Options",
+          "value": "SAMEORIGIN"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "X-DNS-Prefetch-Control",
+          "value": "on"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(), microphone=(), geolocation=()"
+        },
+        {
+          "key": "Strict-Transport-Security",
+          "value": "max-age=63072000; includeSubDomains; preload"
+        }
+      ],
+      "regex": "^(?:/(.*))(?:/)?$"
+    },
+    {
+      "source": "/_next/static/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ],
+      "regex": "^/_next/static(?:/(.*))(?:/)?$"
+    },
+    {
+      "source": "/(.*)\\.(png|jpg|jpeg|gif|webp|avif|svg|ico|woff|woff2|ttf|eot)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=86400, stale-while-revalidate=604800"
+        }
+      ],
+      "regex": "^(?:/(.*))\\.(png|jpg|jpeg|gif|webp|avif|svg|ico|woff|woff2|ttf|eot)(?:/)?$"
+    }
+  ],
+  "rewrites": {
+    "beforeFiles": [],
+    "afterFiles": [],
+    "fallback": []
+  },
+  "dynamicRoutes": [
+    {
+      "page": "/api/auth/[...nextauth]",
+      "regex": "^/api/auth/(.+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPnextauth": "nxtPnextauth"
+      },
+      "namedRegex": "^/api/auth/(?<nxtPnextauth>.+?)(?:/)?$"
+    },
+    {
+      "page": "/api/tickets/[id]",
+      "regex": "^/api/tickets/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/tickets/(?<nxtPid>[^/]+?)(?:/)?$"
+    }
+  ],
+  "staticRoutes": [
+    {
+      "page": "/",
+      "regex": "^/(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/(?:/)?$"
+    },
+    {
+      "page": "/_not-found",
+      "regex": "^/_not\\-found(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/_not\\-found(?:/)?$"
+    },
+    {
+      "page": "/about",
+      "regex": "^/about(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/about(?:/)?$"
+    },
+    {
+      "page": "/admin",
+      "regex": "^/admin(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin(?:/)?$"
+    },
+    {
+      "page": "/contact",
+      "regex": "^/contact(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/contact(?:/)?$"
+    },
+    {
+      "page": "/it-support",
+      "regex": "^/it\\-support(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/it\\-support(?:/)?$"
+    },
+    {
+      "page": "/locations",
+      "regex": "^/locations(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/locations(?:/)?$"
+    },
+    {
+      "page": "/locations/alpharetta-ga",
+      "regex": "^/locations/alpharetta\\-ga(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/locations/alpharetta\\-ga(?:/)?$"
+    },
+    {
+      "page": "/locations/atlanta-ga",
+      "regex": "^/locations/atlanta\\-ga(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/locations/atlanta\\-ga(?:/)?$"
+    },
+    {
+      "page": "/locations/duluth-ga",
+      "regex": "^/locations/duluth\\-ga(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/locations/duluth\\-ga(?:/)?$"
+    },
+    {
+      "page": "/locations/johns-creek-ga",
+      "regex": "^/locations/johns\\-creek\\-ga(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/locations/johns\\-creek\\-ga(?:/)?$"
+    },
+    {
+      "page": "/locations/lawrenceville-ga",
+      "regex": "^/locations/lawrenceville\\-ga(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/locations/lawrenceville\\-ga(?:/)?$"
+    },
+    {
+      "page": "/locations/lilburn-ga",
+      "regex": "^/locations/lilburn\\-ga(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/locations/lilburn\\-ga(?:/)?$"
+    },
+    {
+      "page": "/locations/norcross-ga",
+      "regex": "^/locations/norcross\\-ga(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/locations/norcross\\-ga(?:/)?$"
+    },
+    {
+      "page": "/portal",
+      "regex": "^/portal(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/portal(?:/)?$"
+    },
+    {
+      "page": "/portal/login",
+      "regex": "^/portal/login(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/portal/login(?:/)?$"
+    },
+    {
+      "page": "/portal/register",
+      "regex": "^/portal/register(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/portal/register(?:/)?$"
+    },
+    {
+      "page": "/robots.txt",
+      "regex": "^/robots\\.txt(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/robots\\.txt(?:/)?$"
+    },
+    {
+      "page": "/services",
+      "regex": "^/services(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/services(?:/)?$"
+    },
+    {
+      "page": "/services/business-registration",
+      "regex": "^/services/business\\-registration(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/services/business\\-registration(?:/)?$"
+    },
+    {
+      "page": "/services/immigration",
+      "regex": "^/services/immigration(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/services/immigration(?:/)?$"
+    },
+    {
+      "page": "/services/tax-filing",
+      "regex": "^/services/tax\\-filing(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/services/tax\\-filing(?:/)?$"
+    },
+    {
+      "page": "/services/visa",
+      "regex": "^/services/visa(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/services/visa(?:/)?$"
+    },
+    {
+      "page": "/sitemap.xml",
+      "regex": "^/sitemap\\.xml(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/sitemap\\.xml(?:/)?$"
+    }
+  ],
+  "dataRoutes": [],
+  "rsc": {
+    "header": "rsc",
+    "varyHeader": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch",
+    "prefetchHeader": "next-router-prefetch",
+    "didPostponeHeader": "x-nextjs-postponed",
+    "contentTypeHeader": "text/x-component",
+    "suffix": ".rsc",
+    "prefetchSuffix": ".prefetch.rsc",
+    "prefetchSegmentHeader": "next-router-segment-prefetch",
+    "prefetchSegmentSuffix": ".segment.rsc",
+    "prefetchSegmentDirSuffix": ".segments"
+  },
+  "rewriteHeaders": {
+    "pathHeader": "x-nextjs-rewritten-path",
+    "queryHeader": "x-nextjs-rewritten-query"
+  }
+}

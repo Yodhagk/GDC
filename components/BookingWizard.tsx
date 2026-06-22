@@ -14,7 +14,7 @@ const STEPS = [
 
 const SERVICES = [
   { id: 'tax',         label: 'Tax Planning',           desc: 'Individual or corporate tax strategy', color: '#3B82F6' },
-  { id: 'immigration', label: 'Immigration Consulting',  desc: 'Visa, green card & global mobility',  color: '#E8C040' },
+  { id: 'immigration', label: 'Immigration Consulting',  desc: 'H-1B, green card & US visa services', color: '#E8C040' },
   { id: 'business',   label: 'Business Setup',          desc: 'Formation, EIN & compliance',         color: '#10B981' },
   { id: 'combined',   label: 'Full Advisory Package',   desc: 'Tax + immigration + compliance',      color: '#A78BFA' },
 ];

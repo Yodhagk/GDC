@@ -57,12 +57,12 @@ const testimonials = [
   },
   {
     name: 'James O\'Brien',
-    role: 'International Executive',
-    location: 'Dubai, UAE',
+    role: 'Business Owner',
+    location: 'Alpharetta, GA',
     initials: 'JO',
     rating: 5,
     color: '#34D399',
-    text: 'With business interests across 5 countries, I needed a firm that understood cross-border taxation. Golden Dollar delivered a strategy that saved six figures annually. World-class expertise.',
+    text: 'With multiple business entities and investment properties across several US states, I needed a firm that truly understood cross-border taxation. Golden Dollar delivered a strategy that saved six figures annually.',
     result: '$100K+ Saved',
   },
 ];
@@ -129,7 +129,7 @@ export default function Testimonials() {
             <span className="block" style={{
               background: 'linear-gradient(135deg, #E8C040, #C8920E)',
               WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
-            }}>Worldwide</span>
+            }}>Across Georgia &amp; the USA</span>
           </h2>
         </motion.div>
 

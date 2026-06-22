@@ -3,7 +3,7 @@
 import { useRef } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import { ArrowRight, Play, Globe, Shield, TrendingUp, Award } from 'lucide-react';
+import { ArrowRight, Play, MapPin, Shield, TrendingUp, Award } from 'lucide-react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 
 const GlobeScene = dynamic(() => import('./GlobeScene'), {
@@ -16,7 +16,7 @@ const GlobeScene = dynamic(() => import('./GlobeScene'), {
 });
 
 const badges = [
-  { icon: Globe,      label: '30+ Countries' },
+  { icon: MapPin,     label: 'Lilburn, GA' },
   { icon: Shield,     label: 'IRS Certified' },
   { icon: TrendingUp, label: '$50M+ Saved' },
   { icon: Award,      label: '15+ Years' },
@@ -69,7 +69,7 @@ export default function Hero() {
             >
               <span className="w-2 h-2 rounded-full bg-gold-400 animate-pulse" />
               <span className="text-gold-400 text-xs font-semibold tracking-wide uppercase">
-                Trusted by 5,000+ clients in 30+ countries
+                Trusted by 5,000+ clients across Georgia &amp; the USA
               </span>
             </motion.div>
 
@@ -81,7 +81,7 @@ export default function Hero() {
               className="font-serif font-bold leading-[1.05] mb-6"
               style={{ fontSize: 'clamp(2.8rem, 5.5vw, 5rem)' }}
             >
-              <span className="text-white">Your Global Partner</span>
+              <span className="text-white">Georgia&apos;s Trusted Expert</span>
               <br />
               <span className="text-white">for Tax &amp;</span>
               <span className="block" style={{
@@ -105,7 +105,7 @@ export default function Hero() {
               style={{ color: 'rgba(255,255,255,0.58)' }}
             >
               Expert tax planning, immigration guidance, and business compliance solutions
-              trusted by professionals and families worldwide.
+              for individuals and businesses across Atlanta, GA and nationwide.
             </motion.p>
 
             {/* CTAs */}

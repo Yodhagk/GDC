@@ -16,7 +16,7 @@ const services = [
   {
     icon: Briefcase,
     title: 'Business Immigration',
-    desc: 'Helping entrepreneurs and investors establish global business presence with the right visa strategies.',
+    desc: 'Helping entrepreneurs and investors establish US business presence with the right visa strategies.',
     items: ['EB-5 Investor Visa', 'E-2 Treaty Investor', 'National Interest Waiver', 'PERM Labor Certification'],
     accent: '#60A5FA',
   },
@@ -30,7 +30,7 @@ const services = [
   {
     icon: Users,
     title: 'Immigration Services',
-    desc: 'Guiding individuals, families, and businesses through successful immigration pathways worldwide.',
+    desc: 'Guiding individuals, families, and businesses through successful US immigration pathways.',
     items: ['Visa consultation & strategy', 'Application preparation', 'RFE responses & appeals', 'Status adjustments'],
     accent: '#F472B6',
   },
@@ -76,13 +76,13 @@ function VisaCard({ delay = 0, rotation = 0, color = '#C8920E', label = 'VISA', 
 
 function ImmigrationVisual() {
   const cities = [
-    { name: 'New York', x: 22, y: 38 },
-    { name: 'London', x: 48, y: 28 },
-    { name: 'Dubai', x: 63, y: 44 },
-    { name: 'Singapore', x: 79, y: 55 },
-    { name: 'Sydney', x: 88, y: 70 },
-    { name: 'Toronto', x: 18, y: 30 },
-    { name: 'Paris', x: 50, y: 32 },
+    { name: 'Atlanta', x: 38, y: 55 },
+    { name: 'New York', x: 62, y: 30 },
+    { name: 'Chicago', x: 42, y: 35 },
+    { name: 'Houston', x: 34, y: 65 },
+    { name: 'Los Angeles', x: 12, y: 52 },
+    { name: 'Miami', x: 52, y: 70 },
+    { name: 'Dallas', x: 30, y: 62 },
   ];
 
   return (
@@ -157,7 +157,7 @@ function ImmigrationVisual() {
           transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
           className="absolute bottom-8 left-6"
         >
-          <VisaCard color="#60A5FA" label="PASSPORT" country="GLOBAL" rotation={6} delay={0.5} />
+          <VisaCard color="#60A5FA" label="PASSPORT" country="USA" rotation={6} delay={0.5} />
         </motion.div>
 
         {/* Success badge */}
@@ -223,17 +223,17 @@ export default function ImmigrationExperience() {
         {/* Header */}
         <div className="text-center mb-16">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6 }}>
-            <span className="section-tag">Global Mobility</span>
+            <span className="section-tag">US Immigration</span>
             <h2 className="font-serif text-4xl lg:text-5xl font-bold text-white leading-tight mt-5 mb-5">
               Immigration Consulting
               <span className="block" style={{
                 background: 'linear-gradient(135deg, #E8C040, #C8920E)',
                 WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
-              }}>Built for the World</span>
+              }}>Built for Georgia &amp; the USA</span>
             </h2>
             <p className="text-lg max-w-2xl mx-auto" style={{ color: 'rgba(255,255,255,0.50)' }}>
-              Guiding individuals, families, and businesses through successful immigration pathways
-              in 30+ countries with a 98% approval rate.
+              Guiding individuals, families, and businesses through successful US immigration pathways
+              across Georgia and nationwide — with a 98% approval rate.
             </p>
           </motion.div>
         </div>
@@ -302,7 +302,7 @@ export default function ImmigrationExperience() {
           <div className="flex items-center gap-4">
             <MapPin className="w-8 h-8 text-gold-400 shrink-0" />
             <div>
-              <div className="text-white font-semibold">Ready to begin your global journey?</div>
+              <div className="text-white font-semibold">Ready to begin your US immigration journey?</div>
               <div className="text-sm" style={{ color: 'rgba(255,255,255,0.45)' }}>Free eligibility assessment — no commitment required</div>
             </div>
           </div>
