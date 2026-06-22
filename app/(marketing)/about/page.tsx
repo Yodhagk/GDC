@@ -2,9 +2,17 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Award, Users, TrendingUp, Heart, ArrowRight } from 'lucide-react';
 
+const BASE = 'https://goldendollarconsulting.com';
+
 export const metadata: Metadata = {
-  title: 'About Us',
-  description: 'Learn about Golden Dollar Consultancy — our story, mission, and the expert team behind your financial success.',
+  title: 'About Us | 15+ Years Tax & Immigration Expertise | Since 2009',
+  description: 'Golden Dollar Consultancy — founded 2009 by Priti Patel. IRS-enrolled agents & immigration specialists with 120+ combined years of experience. 5,000+ clients served.',
+  alternates: { canonical: `${BASE}/about` },
+  openGraph: {
+    url: `${BASE}/about`,
+    title: 'About Golden Dollar Consultancy | Expert Tax & Immigration Advisors',
+    description: 'Founded 2009 in Georgia. IRS-enrolled agents, CPAs, and immigration specialists serving individuals and businesses across the US and 30+ countries.',
+  },
 };
 
 const values = [

@@ -1,3 +1,5 @@
+import type { Metadata } from 'next';
+import { localBusinessSchema, serviceSchema, reviewSchema } from '@/lib/seo-schemas';
 import Hero from '@/components/Hero';
 import TaxExperience from '@/components/TaxExperience';
 import TrustStats from '@/components/TrustStats';
@@ -7,9 +9,36 @@ import BookingWizard from '@/components/BookingWizard';
 import Link from 'next/link';
 import { ArrowRight, Phone } from 'lucide-react';
 
+const BASE = 'https://goldendollarconsulting.com';
+
+export const metadata: Metadata = {
+  title: 'Tax & Immigration Consultant USA | 5,000+ Clients | Free Consultation',
+  description: 'Golden Dollar Consultancy — IRS-enrolled agents offering tax filing, US immigration, H-1B visa, business registration & bookkeeping. Serving 30+ countries. Free consultation.',
+  alternates: { canonical: BASE },
+  openGraph: {
+    url: BASE,
+    title: 'Golden Dollar Consultancy | Expert Tax & Immigration Consulting',
+    description: 'Expert US tax filing, immigration consulting, visa services, and business registration. 5,000+ satisfied clients. Book your free consultation today.',
+    images: [{ url: `${BASE}/og-image.png`, width: 1200, height: 630 }],
+  },
+};
+
 export default function HomePage() {
+  const schemas = [
+    localBusinessSchema(),
+    serviceSchema({ name: 'US Tax Filing & Preparation', description: 'Professional federal and state tax filing for individuals and businesses.', url: `${BASE}/services/tax-filing`, category: 'Tax Preparation' }),
+    serviceSchema({ name: 'US Immigration Consulting', description: 'Expert H-1B, L-1, green card, and citizenship immigration assistance.', url: `${BASE}/services/immigration`, category: 'Immigration Consulting' }),
+    ...reviewSchema([
+      { author: 'Rajesh Kumar', rating: 5, body: 'Golden Dollar saved me $12,000 in taxes and got my H-1B approved in record time. Truly the best.', date: '2024-03-15' },
+      { author: 'Priya Nair', rating: 5, body: 'Professional, responsive, and incredibly knowledgeable. They handled my entire green card process flawlessly.', date: '2024-05-20' },
+    ]),
+  ];
+
   return (
     <main style={{ background: '#040B18' }}>
+      {schemas.map((s, i) => (
+        <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(s) }} />
+      ))}
       <Hero />
 
       {/* Thin divider */}

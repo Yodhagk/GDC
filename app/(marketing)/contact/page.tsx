@@ -1,10 +1,19 @@
 import type { Metadata } from 'next';
 import ContactForm from '@/components/ContactForm';
 import { Phone, Mail, MapPin, Clock } from 'lucide-react';
+import { localBusinessSchema, breadcrumbSchema, faqSchema } from '@/lib/seo-schemas';
+
+const BASE = 'https://goldendollarconsulting.com';
 
 export const metadata: Metadata = {
-  title: 'Contact Us',
-  description: 'Reach out to Golden Dollar Consultancy for a free tax consultation. We respond within 24 hours.',
+  title: 'Contact Us | Free Tax & Immigration Consultation | Lilburn GA',
+  description: 'Book your free 30-minute consultation with Golden Dollar Consultancy. Call +1 (469) 269-9784 or fill out our form. Lilburn, GA. Response within 24 hours.',
+  alternates: { canonical: `${BASE}/contact` },
+  openGraph: {
+    url: `${BASE}/contact`,
+    title: 'Contact Golden Dollar Consultancy | Free Consultation',
+    description: 'Free 30-minute consultation for tax filing, immigration, and visa services. Lilburn, GA. Call or email today.',
+  },
 };
 
 const contactInfo = [
@@ -34,9 +43,25 @@ const contactInfo = [
   },
 ];
 
+const contactFaqs = [
+  { question: 'How much does a tax consultation cost?', answer: 'Your initial 30-minute consultation is completely free with no obligation. Ongoing service fees depend on complexity — we provide a flat-fee quote after the consultation.' },
+  { question: 'How quickly can you file my taxes?', answer: 'Standard returns are typically completed within 3–5 business days. Complex returns may take 7–10 days. Rush filing is available for an additional fee.' },
+  { question: 'Do you handle NRI (Non-Resident Indian) tax filing?', answer: 'Yes. We specialize in NRI tax returns including FBAR, FATCA, and foreign income disclosure. We serve clients across India, including Bangalore, and the US.' },
+  { question: 'Can you help with H-1B visa applications from Bangalore?', answer: 'Absolutely. We provide end-to-end H-1B, L-1, and O-1 visa consulting for professionals in Bangalore, Whitefield, Electronic City, and all of India.' },
+];
+
 export default function ContactPage() {
+  const schemas = [
+    localBusinessSchema(),
+    breadcrumbSchema([{ name: 'Home', url: BASE }, { name: 'Contact', url: `${BASE}/contact` }]),
+    faqSchema(contactFaqs),
+  ];
+
   return (
     <>
+      {schemas.map((s, i) => (
+        <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(s) }} />
+      ))}
       {/* Hero */}
       <section className="bg-navy-800 pt-32 pb-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

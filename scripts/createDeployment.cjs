@@ -33,18 +33,24 @@ const FILES = [
   'HOSTINGER_DEPLOY.md',
 ];
 
-// Delete BUILD_ID so smartBuild.cjs always runs a full local compile
-const BUILD_ID = path.join(ROOT, '.next', 'BUILD_ID');
-if (fs.existsSync(BUILD_ID)) fs.unlinkSync(BUILD_ID);
+// Skip build when .next is already fresh (pass --skip-build after a manual `next build`)
+const skipBuild = process.argv.includes('--skip-build');
 
-// Build locally first to ensure .next is fresh and clean
-console.log('🏗  Building production bundle locally...');
-try {
-  execSync('npm run build', { cwd: ROOT, stdio: 'inherit' });
-  console.log('[READY] Build complete.\n');
-} catch {
-  console.error('[FAILED] Build failed. Fix errors before packaging.');
-  process.exit(1);
+if (!skipBuild) {
+  // Delete BUILD_ID so smartBuild.cjs always runs a full local compile
+  const BUILD_ID = path.join(ROOT, '.next', 'BUILD_ID');
+  if (fs.existsSync(BUILD_ID)) fs.unlinkSync(BUILD_ID);
+
+  console.log('🏗  Building production bundle locally...');
+  try {
+    execSync('npm run build', { cwd: ROOT, stdio: 'inherit' });
+    console.log('[READY] Build complete.\n');
+  } catch {
+    console.error('[FAILED] Build failed. Fix errors before packaging.');
+    process.exit(1);
+  }
+} else {
+  console.log('⏭  --skip-build: using existing .next output.\n');
 }
 
 console.log('📦 Creating deployment ZIP with Unix permissions...');

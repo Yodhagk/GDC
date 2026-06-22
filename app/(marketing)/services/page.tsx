@@ -1,10 +1,19 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { FileText, Globe, BookOpen, Building2, CheckCircle, ArrowRight } from 'lucide-react';
+import { breadcrumbSchema } from '@/lib/seo-schemas';
+
+const BASE = 'https://goldendollarconsulting.com';
 
 export const metadata: Metadata = {
-  title: 'Our Services',
-  description: 'Explore the full range of services at Golden Dollar Consultancy — tax filing, immigration, bookkeeping, and company registrations.',
+  title: 'Tax & Immigration Services | Visa, Business Registration | USA',
+  description: 'Complete tax filing, US immigration consulting, H-1B visa, bookkeeping, and business registration services. Licensed professionals. Free consultation.',
+  alternates: { canonical: `${BASE}/services` },
+  openGraph: {
+    url: `${BASE}/services`,
+    title: 'Our Services | Golden Dollar Consultancy',
+    description: 'Tax filing, immigration, visa assistance, bookkeeping, and business registration by IRS-enrolled agents.',
+  },
 };
 
 const services = [
@@ -75,19 +84,41 @@ const services = [
 ];
 
 export default function ServicesPage() {
+  const bc = breadcrumbSchema([
+    { name: 'Home', url: BASE },
+    { name: 'Services', url: `${BASE}/services` },
+  ]);
+
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(bc) }} />
+
       {/* Hero */}
       <section className="bg-navy-800 pt-32 pb-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <span className="section-tag">Our Expertise</span>
           <h1 className="font-serif text-5xl lg:text-6xl font-bold text-white leading-tight mt-4 mb-4">
-            Full-Spectrum Tax Services
+            Tax, Immigration &amp; Business Services
           </h1>
           <p className="text-white/55 text-lg max-w-2xl mx-auto">
-            From your first tax return to complex IRS negotiations, our certified professionals
-            provide expert guidance at every stage of your financial journey.
+            IRS-enrolled agents and immigration specialists serving 5,000+ clients across
+            30+ countries — from first-time filers to complex corporate structures.
           </p>
+          <div className="flex flex-wrap gap-3 justify-center mt-8">
+            {[
+              { label: 'Tax Filing', href: '/services/tax-filing' },
+              { label: 'Immigration', href: '/services/immigration' },
+              { label: 'Visa Services', href: '/services/visa' },
+              { label: 'Business Registration', href: '/services/business-registration' },
+              { label: 'Bookkeeping', href: '/services/bookkeeping' },
+            ].map((s) => (
+              <Link key={s.href} href={s.href}
+                className="px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 cursor-pointer"
+                style={{ background: 'rgba(200,146,14,0.12)', border: '1px solid rgba(200,146,14,0.30)', color: '#E8C040' }}>
+                {s.label}
+              </Link>
+            ))}
+          </div>
         </div>
       </section>
 
