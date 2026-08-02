@@ -110,6 +110,21 @@ jobs:
           APP_DIR="$HOME/domains/goldendollarconsulting.com/nodejs"
           ZIP="$HOME/gdc-deploy.zip"
 
+          # Non-interactive SSH doesn't source profiles, so npm isn't on PATH.
+          # Try the usual profile files, then nvm, then Hostinger's alt-nodejs.
+          [ -f "$HOME/.bashrc" ]  && . "$HOME/.bashrc"  >/dev/null 2>&1 || true
+          [ -f "$HOME/.profile" ] && . "$HOME/.profile" >/dev/null 2>&1 || true
+          if ! command -v npm >/dev/null 2>&1; then
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh" >/dev/null 2>&1 || true
+          fi
+          if ! command -v npm >/dev/null 2>&1; then
+            NODE_BIN=$(ls -d /opt/alt/alt-nodejs*/root/usr/bin 2>/dev/null | sort -V | tail -1 || true)
+            [ -n "$NODE_BIN" ] && export PATH="$NODE_BIN:$PATH"
+          fi
+          command -v npm >/dev/null 2>&1 || { echo "ERROR: npm not found on server — install Node.js or fix PATH"; exit 1; }
+          echo ">>> node: $(command -v node) ($(node -v 2>/dev/null)) | npm: $(command -v npm)"
+
           echo "──────────────────────────────────────────"
           echo " GDC Deploy  $(date '+%Y-%m-%d %H:%M:%S')"
           echo " Target: $APP_DIR"
