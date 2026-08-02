@@ -2,7 +2,7 @@
 #  Auto-deploy to Hostinger on every push to main
 #
 #  Required GitHub Secrets (Settings → Secrets and variables → Actions):
-#    HOSTINGER_SSH_PASS   — SSH password: deltaDragon@786
+#    HOSTINGER_SSH_PASS   — Hostinger SSH password
 #    DATABASE_URL         — e.g. file:./prod.db  or  mysql://...
 #    NEXTAUTH_SECRET      — random 32-char string
 #    NEXTAUTH_URL         — https://yourdomain.com
@@ -95,7 +95,7 @@ jobs:
             -o StrictHostKeyChecking=no \
             -o ConnectTimeout=30 \
             "$SSH_USER@$SSH_HOST" bash << 'REMOTE'
-          set -e
+          set -eo pipefail
 
           APP_DIR="$HOME/domains/goldendollarconsulting.com/nodejs"
           ZIP="$HOME/gdc-deploy.zip"
@@ -131,9 +131,9 @@ jobs:
           echo ">>> Generating Prisma client..."
           npx prisma generate 2>&1 | tail -4
 
-          # Run any pending DB migrations
-          echo ">>> Running DB migrations..."
-          npx prisma migrate deploy 2>&1 | tail -4 || true
+          # Sync DB schema (project uses `db push`, there are no migration files)
+          echo ">>> Syncing database schema..."
+          npx prisma db push --skip-generate 2>&1 | tail -6
 
           # Restart via LiteSpeed (Hostinger) — touch tmp/restart.txt
           echo ">>> Triggering LiteSpeed Node.js restart..."
