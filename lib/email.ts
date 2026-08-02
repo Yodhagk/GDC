@@ -1,23 +1,6 @@
-import nodemailer from 'nodemailer';
-
-function getTransporter() {
-  // Microsoft Outlook / Office 365 SMTP
-  return nodemailer.createTransport({
-    host: process.env.SMTP_HOST || 'smtp.office365.com',
-    port: Number(process.env.SMTP_PORT) || 587,
-    secure: false, // STARTTLS on port 587
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
-    },
-    tls: {
-      rejectUnauthorized: false, // required for Office 365
-    },
-  });
-}
+import { sendGraphMail, graphMailConfigured } from './graphMail';
 
 const SUPPORT_EMAIL = process.env.SUPPORT_EMAIL || 'itsupport@goldendollarconsulting.com';
-const FROM = process.env.SMTP_FROM || 'Golden Dollar Consultancy <noreply@goldendollarconsulting.com>';
 
 export async function sendTicketCreatedEmail(opts: {
   clientName: string;
@@ -28,14 +11,10 @@ export async function sendTicketCreatedEmail(opts: {
   priority: string;
   message: string;
 }) {
-  // Skip silently if SMTP not configured
-  if (!process.env.SMTP_USER || !process.env.SMTP_PASS) return;
-
-  const transporter = getTransporter();
+  if (!graphMailConfigured()) return;
 
   // Notify IT support
-  await transporter.sendMail({
-    from: FROM,
+  await sendGraphMail({
     to: SUPPORT_EMAIL,
     subject: `[${opts.ticketNo}] New Support Ticket: ${opts.subject}`,
     html: `
@@ -54,8 +33,7 @@ export async function sendTicketCreatedEmail(opts: {
   });
 
   // Confirm to client
-  await transporter.sendMail({
-    from: FROM,
+  await sendGraphMail({
     to: opts.clientEmail,
     subject: `Your Support Ticket ${opts.ticketNo} Has Been Received`,
     html: `
@@ -78,15 +56,12 @@ export async function sendPasswordResetEmail(opts: {
   email: string;
   resetUrl: string;
 }) {
-  if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+  if (!graphMailConfigured()) {
     console.log(`[DEV] Password reset link for ${opts.email}: ${opts.resetUrl}`);
     return;
   }
 
-  const transporter = getTransporter();
-
-  await transporter.sendMail({
-    from: FROM,
+  await sendGraphMail({
     to: opts.email,
     subject: 'Reset Your Golden Dollar Consultancy Password',
     html: `
@@ -105,15 +80,12 @@ export async function sendPasswordResetEmail(opts: {
 }
 
 export async function sendMfaCodeEmail(opts: { name: string; email: string; code: string }) {
-  if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+  if (!graphMailConfigured()) {
     console.log(`[DEV] MFA code for ${opts.email}: ${opts.code}`);
     return;
   }
 
-  const transporter = getTransporter();
-
-  await transporter.sendMail({
-    from: FROM,
+  await sendGraphMail({
     to: opts.email,
     subject: `${opts.code} is your Golden Dollar Consultancy verification code`,
     html: `
@@ -137,12 +109,9 @@ export async function sendTicketResolvedEmail(opts: {
   subject: string;
   response: string;
 }) {
-  if (!process.env.SMTP_USER || !process.env.SMTP_PASS) return;
+  if (!graphMailConfigured()) return;
 
-  const transporter = getTransporter();
-
-  await transporter.sendMail({
-    from: FROM,
+  await sendGraphMail({
     to: opts.clientEmail,
     subject: `[${opts.ticketNo}] Your Ticket Has Been Resolved`,
     html: `
