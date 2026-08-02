@@ -15,6 +15,9 @@
 #    SMTP_PASS            — Outlook app password
 #    SMTP_FROM            — "Golden Dollar Consultancy <priti@goldendollarconsulting.com>"
 #    SUPPORT_EMAIL        — itsupport@goldendollarconsulting.com
+#    AZURE_AD_CLIENT_ID    — optional, enables "Continue with Microsoft" on login
+#    AZURE_AD_CLIENT_SECRET
+#    AZURE_AD_TENANT_ID    — optional, defaults to "common"
 # ─────────────────────────────────────────────────────────────────────────────
 
 name: 🚀 Deploy to Hostinger
@@ -68,6 +71,9 @@ jobs:
           SMTP_PASS:             ${{ secrets.SMTP_PASS }}
           SMTP_FROM:             ${{ secrets.SMTP_FROM }}
           SUPPORT_EMAIL:         ${{ secrets.SUPPORT_EMAIL }}
+          AZURE_AD_CLIENT_ID:     ${{ secrets.AZURE_AD_CLIENT_ID }}
+          AZURE_AD_CLIENT_SECRET: ${{ secrets.AZURE_AD_CLIENT_SECRET }}
+          AZURE_AD_TENANT_ID:     ${{ secrets.AZURE_AD_TENANT_ID }}
 
       # ── 5. Install sshpass on the runner ───────────────────────────────────
       - name: Install sshpass

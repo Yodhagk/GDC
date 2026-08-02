@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect, FormEvent } from 'react';
-import { signIn, useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, Suspense, FormEvent } from 'react';
+import { signIn, useSession, getProviders } from 'next-auth/react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Eye, EyeOff, LogIn, AlertCircle, ShieldCheck, ArrowLeft } from 'lucide-react';
 
@@ -13,9 +13,29 @@ const MFA_ERRORS: Record<string, string> = {
   MFA_EMAIL_FAILED: 'We could not send your verification code. Please try again shortly.',
 };
 
-export default function LoginPage() {
+const OAUTH_ERRORS: Record<string, string> = {
+  OAuthSignin: 'Could not start Microsoft sign-in. Please try again.',
+  OAuthCallback: 'Microsoft sign-in failed. Please try again.',
+  OAuthCreateAccount: 'We could not create your account from your Microsoft profile.',
+  AccessDenied: 'Access was denied by Microsoft. Please try again.',
+  Default: 'Sign-in failed. Please try again.',
+};
+
+function MicrosoftIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 21 21" aria-hidden="true">
+      <rect x="1" y="1" width="9" height="9" fill="#f25022" />
+      <rect x="11" y="1" width="9" height="9" fill="#7fba00" />
+      <rect x="1" y="11" width="9" height="9" fill="#00a4ef" />
+      <rect x="11" y="11" width="9" height="9" fill="#ffb900" />
+    </svg>
+  );
+}
+
+function LoginPageInner() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [form, setForm] = useState({ email: '', password: '' });
   const [otp, setOtp] = useState('');
   const [step, setStep] = useState<'credentials' | 'otp'>('credentials');
@@ -24,6 +44,8 @@ export default function LoginPage() {
   const [info, setInfo] = useState('');
   const [loading, setLoading] = useState(false);
   const [resending, setResending] = useState(false);
+  const [msLoading, setMsLoading] = useState(false);
+  const [msAvailable, setMsAvailable] = useState(false);
 
   useEffect(() => {
     if (status === 'authenticated' && session) {
@@ -33,6 +55,17 @@ export default function LoginPage() {
       else router.replace('/portal');
     }
   }, [status, session, router]);
+
+  useEffect(() => {
+    getProviders().then((providers) => {
+      if (providers && 'azure-ad' in providers) setMsAvailable(true);
+    });
+  }, []);
+
+  useEffect(() => {
+    const oauthError = searchParams?.get('error');
+    if (oauthError) setError(OAUTH_ERRORS[oauthError] || OAUTH_ERRORS.Default);
+  }, [searchParams]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm((p) => ({ ...p, [e.target.name]: e.target.value }));
@@ -109,6 +142,14 @@ export default function LoginPage() {
     }
   };
 
+  const handleMicrosoftSignIn = async () => {
+    setError('');
+    setInfo('');
+    setMsLoading(true);
+    // Full-page redirect to Microsoft — the browser leaves the app here.
+    await signIn('azure-ad', { callbackUrl: '/portal/login' });
+  };
+
   if (status === 'loading') {
     return (
       <div className="flex items-center justify-center min-h-[calc(100vh-64px)]">
@@ -148,6 +189,32 @@ export default function LoginPage() {
 
           {step === 'credentials' ? (
             <>
+              {msAvailable && (
+                <>
+                  <button
+                    type="button"
+                    onClick={handleMicrosoftSignIn}
+                    disabled={msLoading}
+                    className="w-full flex items-center justify-center gap-2.5 border border-gray-200 rounded-xl px-4 py-3 text-sm font-medium text-navy-800 hover:bg-gray-50 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                  >
+                    {msLoading ? (
+                      <div className="w-4 h-4 border-2 border-navy-800/30 border-t-navy-800 rounded-full animate-spin" />
+                    ) : (
+                      <>
+                        <MicrosoftIcon />
+                        Continue with Microsoft
+                      </>
+                    )}
+                  </button>
+
+                  <div className="flex items-center gap-3 my-6">
+                    <div className="flex-1 h-px bg-gray-100" />
+                    <span className="text-xs text-gray-400">OR</span>
+                    <div className="flex-1 h-px bg-gray-100" />
+                  </div>
+                </>
+              )}
+
               <form onSubmit={handleCredentialsSubmit} className="space-y-5">
                 <div>
                   <label className="block text-sm font-medium text-navy-800 mb-1.5">Email Address</label>
@@ -289,5 +356,13 @@ export default function LoginPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginPageInner />
+    </Suspense>
   );
 }
