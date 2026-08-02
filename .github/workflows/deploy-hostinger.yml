@@ -98,13 +98,20 @@ jobs:
       - name: Deploy on Hostinger
         env:
           SSH_PASS: ${{ secrets.HOSTINGER_SSH_PASS }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: |
+          # The server has no .env (env vars live in hPanel), so hand the
+          # Prisma CLI its DATABASE_URL via the remote command line.
+          REMOTE_ENV=""
+          if [ -n "$DATABASE_URL" ]; then
+            REMOTE_ENV="DATABASE_URL=$(printf '%q' "$DATABASE_URL") "
+          fi
           run_remote() {
             sshpass -p "$SSH_PASS" ssh \
               -p "$SSH_PORT" \
               -o StrictHostKeyChecking=no \
               -o ConnectTimeout=30 \
-              "$SSH_USER@$SSH_HOST" bash << 'REMOTE'
+              "$SSH_USER@$SSH_HOST" "${REMOTE_ENV}bash" << 'REMOTE'
           set -eo pipefail
 
           APP_DIR="$HOME/domains/goldendollarconsulting.com/nodejs"
@@ -158,7 +165,7 @@ jobs:
 
           # Sync DB schema (project uses `db push`, there are no migration files)
           echo ">>> Syncing database schema..."
-          npx prisma db push --skip-generate 2>&1 | tail -6
+          npx prisma db push --skip-generate
 
           # Restart via LiteSpeed (Hostinger) — touch tmp/restart.txt
           echo ">>> Triggering LiteSpeed Node.js restart..."
