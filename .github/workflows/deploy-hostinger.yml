@@ -78,23 +78,33 @@ jobs:
         env:
           SSH_PASS: ${{ secrets.HOSTINGER_SSH_PASS }}
         run: |
-          sshpass -p "$SSH_PASS" scp \
-            -P "$SSH_PORT" \
-            -o StrictHostKeyChecking=no \
-            -o ConnectTimeout=30 \
-            gdc-deploy.zip \
-            "$SSH_USER@$SSH_HOST:~/gdc-deploy.zip"
+          ok=0
+          for attempt in 1 2 3 4; do
+            echo "Upload attempt $attempt..."
+            if sshpass -p "$SSH_PASS" scp \
+              -P "$SSH_PORT" \
+              -o StrictHostKeyChecking=no \
+              -o ConnectTimeout=30 \
+              gdc-deploy.zip \
+              "$SSH_USER@$SSH_HOST:~/gdc-deploy.zip"; then
+              ok=1; break
+            fi
+            echo "Attempt $attempt failed — retrying in 30s..."
+            sleep 30
+          done
+          [ "$ok" = "1" ] || { echo "::error::All upload attempts failed"; exit 1; }
 
       # ── 7. Deploy on the Hostinger server ──────────────────────────────────
       - name: Deploy on Hostinger
         env:
           SSH_PASS: ${{ secrets.HOSTINGER_SSH_PASS }}
         run: |
-          sshpass -p "$SSH_PASS" ssh \
-            -p "$SSH_PORT" \
-            -o StrictHostKeyChecking=no \
-            -o ConnectTimeout=30 \
-            "$SSH_USER@$SSH_HOST" bash << 'REMOTE'
+          run_remote() {
+            sshpass -p "$SSH_PASS" ssh \
+              -p "$SSH_PORT" \
+              -o StrictHostKeyChecking=no \
+              -o ConnectTimeout=30 \
+              "$SSH_USER@$SSH_HOST" bash << 'REMOTE'
           set -eo pipefail
 
           APP_DIR="$HOME/domains/goldendollarconsulting.com/nodejs"
@@ -148,3 +158,13 @@ jobs:
           echo " ✅ Deployment complete!"
           echo "──────────────────────────────────────────"
           REMOTE
+          }
+
+          ok=0
+          for attempt in 1 2 3; do
+            echo "Deploy attempt $attempt..."
+            if run_remote; then ok=1; break; fi
+            echo "Attempt $attempt failed — retrying in 30s..."
+            sleep 30
+          done
+          [ "$ok" = "1" ] || { echo "::error::All deploy attempts failed"; exit 1; }
