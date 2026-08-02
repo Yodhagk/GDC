@@ -203,6 +203,12 @@
       "namedRegex": "^/portal(?:/)?$"
     },
     {
+      "page": "/portal/forgot-password",
+      "regex": "^/portal/forgot\\-password(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/portal/forgot\\-password(?:/)?$"
+    },
+    {
       "page": "/portal/login",
       "regex": "^/portal/login(?:/)?$",
       "routeKeys": {},
@@ -213,6 +219,12 @@
       "regex": "^/portal/register(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/portal/register(?:/)?$"
+    },
+    {
+      "page": "/portal/reset-password",
+      "regex": "^/portal/reset\\-password(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/portal/reset\\-password(?:/)?$"
     },
     {
       "page": "/robots.txt",
