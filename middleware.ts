@@ -6,6 +6,13 @@ export default withAuth(
     const token = req.nextauth.token;
     const { pathname } = req.nextUrl;
 
+    // Deactivated accounts lose access immediately, even with a still-valid session
+    if (token && token.isActive === false) {
+      const url = new URL('/portal/login', req.url);
+      url.searchParams.set('error', 'AccountDeactivated');
+      return NextResponse.redirect(url);
+    }
+
     // Admin-only routes
     if (pathname.startsWith('/admin') && token?.role !== 'admin') {
       return NextResponse.redirect(new URL('/portal', req.url));
@@ -30,6 +37,7 @@ export default withAuth(
           '/portal/register',
           '/portal/forgot-password',
           '/portal/reset-password',
+          '/portal/verify-email',
         ];
         if (publicPortalPages.includes(pathname)) {
           return true;

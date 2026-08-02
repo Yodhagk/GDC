@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { generateCustomerId } from '@/lib/utils';
+import { issueVerificationEmail } from '@/lib/verifyEmail';
 import bcrypt from 'bcryptjs';
 
 export async function POST(req: NextRequest) {
@@ -46,6 +47,16 @@ export async function POST(req: NextRequest) {
         customerId,
       },
     });
+
+    try {
+      await issueVerificationEmail(
+        { id: user.id, name: user.name, email: user.email, verifyEmailIssuedAt: null, verifyEmailTokenExpires: null },
+        process.env.NEXTAUTH_URL || req.nextUrl.origin
+      );
+    } catch (err) {
+      console.error('Failed to send verification email:', err);
+      // Don't fail registration over an email hiccup — the account can request a resend.
+    }
 
     return NextResponse.json({ success: true, customerId: user.customerId }, { status: 201 });
   } catch (error) {

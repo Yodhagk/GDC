@@ -11,6 +11,7 @@ const MFA_ERRORS: Record<string, string> = {
   MFA_EXPIRED: 'That code has expired. Please request a new one.',
   MFA_LOCKED: 'Too many incorrect attempts. Please request a new code.',
   MFA_EMAIL_FAILED: 'We could not send your verification code. Please try again shortly.',
+  ACCOUNT_DEACTIVATED: 'Your account has been deactivated. Please contact support.',
 };
 
 const OAUTH_ERRORS: Record<string, string> = {
@@ -18,6 +19,7 @@ const OAUTH_ERRORS: Record<string, string> = {
   OAuthCallback: 'Microsoft sign-in failed. Please try again.',
   OAuthCreateAccount: 'We could not create your account from your Microsoft profile.',
   AccessDenied: 'Access was denied by Microsoft. Please try again.',
+  AccountDeactivated: 'Your account has been deactivated. Please contact support.',
   Default: 'Sign-in failed. Please try again.',
 };
 
@@ -46,6 +48,8 @@ function LoginPageInner() {
   const [resending, setResending] = useState(false);
   const [msLoading, setMsLoading] = useState(false);
   const [msAvailable, setMsAvailable] = useState(false);
+  const [needsVerification, setNeedsVerification] = useState(false);
+  const [resendingVerification, setResendingVerification] = useState(false);
 
   useEffect(() => {
     if (status === 'authenticated' && session) {
@@ -74,6 +78,7 @@ function LoginPageInner() {
     e.preventDefault();
     setError('');
     setInfo('');
+    setNeedsVerification(false);
     setLoading(true);
 
     const result = await signIn('credentials', {
@@ -88,10 +93,31 @@ function LoginPageInner() {
       setStep('otp');
       setOtp('');
       setInfo('We emailed you a 6-digit verification code. It expires in 10 minutes.');
+    } else if (result?.error === 'EMAIL_NOT_VERIFIED') {
+      setError('Please verify your email address before signing in.');
+      setNeedsVerification(true);
     } else if (result?.error && MFA_ERRORS[result.error]) {
       setError(MFA_ERRORS[result.error]);
     } else if (result?.error) {
       setError('Invalid email or password. Please try again.');
+    }
+  };
+
+  const handleResendVerification = async () => {
+    setResendingVerification(true);
+    try {
+      const res = await fetch('/api/verify-email/resend', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: form.email.trim().toLowerCase() }),
+      });
+      if (res.ok) {
+        setInfo('A new verification link has been sent — check your inbox.');
+        setError('');
+        setNeedsVerification(false);
+      }
+    } finally {
+      setResendingVerification(false);
     }
   };
 
@@ -174,9 +200,21 @@ function LoginPageInner() {
 
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
           {error && (
-            <div className="flex items-center gap-3 bg-red-50 border border-red-100 text-red-700 text-sm rounded-xl px-4 py-3 mb-6">
-              <AlertCircle className="w-4 h-4 shrink-0" />
-              {error}
+            <div className="bg-red-50 border border-red-100 text-red-700 text-sm rounded-xl px-4 py-3 mb-6">
+              <div className="flex items-center gap-3">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                {error}
+              </div>
+              {needsVerification && (
+                <button
+                  type="button"
+                  onClick={handleResendVerification}
+                  disabled={resendingVerification}
+                  className="mt-2 ml-7 text-red-700 underline font-medium disabled:opacity-60"
+                >
+                  {resendingVerification ? 'Sending…' : 'Resend verification email'}
+                </button>
+              )}
             </div>
           )}
 

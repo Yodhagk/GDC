@@ -1,11 +1,12 @@
 {
   "version": 1,
   "functions": {
+    "/api/admin/documents/dropbox-link": {},
     "/api/admin/documents": {},
-    "/api/files/download": {},
     "/api/files": {},
+    "/api/files/download": {},
     "/api/tickets/[id]": {},
-    "/api/tickets": {},
-    "/api/upload": {}
+    "/api/upload": {},
+    "/api/tickets": {}
   }
 }

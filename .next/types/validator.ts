@@ -267,6 +267,24 @@ type ApiRouteConfig = {
   type __Unused = __Check
 }
 
+// Validate ../../app/portal/verify-email/page.tsx
+{
+  type __IsExpected<Specific extends AppPageConfig<"/portal/verify-email">> = Specific
+  const handler = {} as typeof import("../../app/portal/verify-email/page.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../app/api/admin/documents/dropbox-link/route.ts
+{
+  type __IsExpected<Specific extends RouteHandlerConfig<"/api/admin/documents/dropbox-link">> = Specific
+  const handler = {} as typeof import("../../app/api/admin/documents/dropbox-link/route.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
 // Validate ../../app/api/admin/documents/route.ts
 {
   type __IsExpected<Specific extends RouteHandlerConfig<"/api/admin/documents">> = Specific
@@ -361,6 +379,24 @@ type ApiRouteConfig = {
 {
   type __IsExpected<Specific extends RouteHandlerConfig<"/api/upload">> = Specific
   const handler = {} as typeof import("../../app/api/upload/route.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../app/api/verify-email/resend/route.ts
+{
+  type __IsExpected<Specific extends RouteHandlerConfig<"/api/verify-email/resend">> = Specific
+  const handler = {} as typeof import("../../app/api/verify-email/resend/route.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../app/api/verify-email/route.ts
+{
+  type __IsExpected<Specific extends RouteHandlerConfig<"/api/verify-email">> = Specific
+  const handler = {} as typeof import("../../app/api/verify-email/route.js")
   type __Check = __IsExpected<typeof handler>
   // @ts-ignore
   type __Unused = __Check

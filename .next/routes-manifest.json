@@ -227,6 +227,12 @@
       "namedRegex": "^/portal/reset\\-password(?:/)?$"
     },
     {
+      "page": "/portal/verify-email",
+      "regex": "^/portal/verify\\-email(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/portal/verify\\-email(?:/)?$"
+    },
+    {
       "page": "/robots.txt",
       "regex": "^/robots\\.txt(?:/)?$",
       "routeKeys": {},

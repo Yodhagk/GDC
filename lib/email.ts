@@ -79,6 +79,50 @@ export async function sendPasswordResetEmail(opts: {
   });
 }
 
+export async function sendVerificationEmail(opts: {
+  name: string;
+  email: string;
+  verifyUrl: string;
+}) {
+  if (!graphMailConfigured()) {
+    console.log(`[DEV] Verification link for ${opts.email}: ${opts.verifyUrl}`);
+    return;
+  }
+
+  await sendGraphMail({
+    to: opts.email,
+    subject: 'Verify your email — Golden Dollar Consultancy',
+    html: `
+      <div style="font-family:sans-serif;max-width:600px">
+        <h2 style="color:#0a1628">Confirm Your Email Address</h2>
+        <p>Hi ${opts.name},</p>
+        <p>Thanks for creating a client portal account. Please verify your email address to activate your account. This link expires in <strong>24 hours</strong>.</p>
+        <p style="margin:24px 0">
+          <a href="${opts.verifyUrl}" style="background:#d4a018;color:#0a1628;font-weight:bold;text-decoration:none;padding:12px 28px;border-radius:8px;display:inline-block">Verify Email</a>
+        </p>
+        <p style="color:#666;font-size:13px">If the button doesn't work, copy and paste this link into your browser:<br/>${opts.verifyUrl}</p>
+        <p style="color:#666;font-size:13px">If you didn't create this account, you can safely ignore this email.</p>
+        <p style="color:#666;font-size:13px">Golden Dollar Consultancy · +1 (469) 269-9784</p>
+      </div>`,
+  });
+}
+
+export async function sendAccountDeactivatedEmail(opts: { name: string; email: string }) {
+  if (!graphMailConfigured()) return;
+
+  await sendGraphMail({
+    to: opts.email,
+    subject: 'Your Golden Dollar Consultancy account has been deactivated',
+    html: `
+      <div style="font-family:sans-serif;max-width:600px">
+        <h2 style="color:#0a1628">Account Deactivated</h2>
+        <p>Hi ${opts.name},</p>
+        <p>Your client portal account has been deactivated by our support team. If you believe this is a mistake, please contact us.</p>
+        <p style="color:#666;font-size:13px">Golden Dollar Consultancy · +1 (469) 269-9784 · ${SUPPORT_EMAIL}</p>
+      </div>`,
+  });
+}
+
 export async function sendMfaCodeEmail(opts: { name: string; email: string; code: string }) {
   if (!graphMailConfigured()) {
     console.log(`[DEV] MFA code for ${opts.email}: ${opts.code}`);

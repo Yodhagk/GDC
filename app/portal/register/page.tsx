@@ -102,6 +102,14 @@ export default function RegisterPage() {
               Screenshot or write this down. You can also find it in your portal dashboard.
             </p>
 
+            <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-6 text-left">
+              <p className="text-sm font-medium text-navy-800 mb-1">Verify your email to sign in</p>
+              <p className="text-xs text-gray-500">
+                We've sent a verification link to <strong>{form.email}</strong>. You'll need to
+                click it before you can sign in — check your inbox (and spam folder).
+              </p>
+            </div>
+
             <Link
               href="/portal/login"
               className="btn-gold w-full flex items-center justify-center gap-2"

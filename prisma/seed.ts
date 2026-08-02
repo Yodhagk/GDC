@@ -19,6 +19,7 @@ async function main() {
         password: hash,
         customerId: 'GDC-ADMIN1',
         role: 'admin',
+        emailVerified: new Date(),
       },
     });
     console.log('✅ Admin user created:', adminEmail);
@@ -39,6 +40,7 @@ async function main() {
         password: hash,
         customerId: 'GDC-ITSUP1',
         role: 'it_support',
+        emailVerified: new Date(),
       },
     });
     console.log('✅ IT Support user created:', itEmail);

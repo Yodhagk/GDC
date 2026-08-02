@@ -6,7 +6,8 @@ import { useRouter } from 'next/navigation';
 import {
   Users, FileText, Shield, TrendingUp, LogOut, RefreshCw,
   Trash2, Eye, ChevronDown, DollarSign, UserCheck, Wrench,
-  Search, Download, X, CheckCircle, AlertCircle,
+  Search, Download, X, CheckCircle, AlertCircle, MailCheck,
+  UserX, UserCheck2, Send, ExternalLink,
 } from 'lucide-react';
 import { formatDate, formatFileSize, getFileIcon } from '@/lib/utils';
 import toast from 'react-hot-toast';
@@ -17,10 +18,12 @@ type UserRow = {
   email: string;
   customerId: string;
   role: string;
+  isActive: boolean;
+  emailVerified: string | null;
   createdAt: string;
 };
 
-type FileItem = { name: string; path: string; size: number; modified: string };
+type FileItem = { name: string; path: string; size: number; modified: string; category: string };
 
 type Stats = { totalUsers: number; clientCount: number; adminCount: number; itCount: number };
 
@@ -112,6 +115,37 @@ export default function AdminDashboard() {
     }
   };
 
+  const patchUser = async (id: string, body: Record<string, unknown>) => {
+    const res = await fetch('/api/admin/users', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, ...body }),
+    });
+    if (res.ok) {
+      await fetchUsers();
+    } else {
+      const d = await res.json().catch(() => ({}));
+      toast.error(d.error ?? 'Update failed');
+    }
+    return res.ok;
+  };
+
+  const toggleActive = async (u: UserRow) => {
+    const next = !u.isActive;
+    if (next === false && !confirm(`Deactivate "${u.name}"? They will be signed out and unable to log in until reactivated.`)) return;
+    if (await patchUser(u.id, { isActive: next })) {
+      toast.success(next ? `${u.name} reactivated` : `${u.name} deactivated`);
+    }
+  };
+
+  const forceVerify = async (u: UserRow) => {
+    if (await patchUser(u.id, { forceVerify: true })) toast.success(`${u.name}'s email marked as verified`);
+  };
+
+  const resendVerification = async (u: UserRow) => {
+    if (await patchUser(u.id, { resendVerification: true })) toast.success(`Verification email resent to ${u.email}`);
+  };
+
   const viewDocuments = async (u: UserRow) => {
     setViewingUser(u);
     setUserFiles([]);
@@ -132,6 +166,21 @@ export default function AdminDashboard() {
       window.open(url, '_blank');
     } catch {
       toast.error('Could not generate download link');
+    }
+  };
+
+  const [openingDropbox, setOpeningDropbox] = useState(false);
+  const openInDropbox = async (customerId: string) => {
+    setOpeningDropbox(true);
+    try {
+      const res = await fetch(`/api/admin/documents/dropbox-link?customerId=${customerId}`);
+      if (!res.ok) throw new Error();
+      const { url } = await res.json();
+      window.open(url, '_blank');
+    } catch {
+      toast.error('Could not open Dropbox folder');
+    } finally {
+      setOpeningDropbox(false);
     }
   };
 
@@ -282,6 +331,7 @@ export default function AdminDashboard() {
                         <th className="text-left px-6 py-3 text-xs text-gray-400 font-semibold uppercase tracking-wider">Name</th>
                         <th className="text-left px-4 py-3 text-xs text-gray-400 font-semibold uppercase tracking-wider hidden md:table-cell">Customer ID</th>
                         <th className="text-left px-4 py-3 text-xs text-gray-400 font-semibold uppercase tracking-wider">Role</th>
+                        <th className="text-left px-4 py-3 text-xs text-gray-400 font-semibold uppercase tracking-wider">Status</th>
                         <th className="text-left px-4 py-3 text-xs text-gray-400 font-semibold uppercase tracking-wider hidden lg:table-cell">Joined</th>
                         <th className="px-4 py-3" />
                       </tr>
@@ -318,11 +368,52 @@ export default function AdminDashboard() {
                               </div>
                             )}
                           </td>
+                          <td className="px-4 py-3">
+                            <div className="flex flex-col gap-1 items-start">
+                              <span className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+                                u.isActive ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-600'
+                              }`}>
+                                <span className={`w-1.5 h-1.5 rounded-full ${u.isActive ? 'bg-green-500' : 'bg-red-500'}`} />
+                                {u.isActive ? 'Active' : 'Deactivated'}
+                              </span>
+                              {u.emailVerified ? (
+                                <span className="inline-flex items-center gap-1 text-[10px] font-medium text-gray-400">
+                                  <MailCheck className="w-3 h-3 text-green-500" /> Verified
+                                </span>
+                              ) : (
+                                <button
+                                  onClick={() => forceVerify(u)}
+                                  className="inline-flex items-center gap-1 text-[10px] font-medium text-amber-600 hover:text-amber-700"
+                                  title="Click to mark verified without waiting for the email link"
+                                >
+                                  <AlertCircle className="w-3 h-3" /> Unverified — force verify
+                                </button>
+                              )}
+                            </div>
+                          </td>
                           <td className="px-4 py-3 text-gray-400 text-xs hidden lg:table-cell">
                             {formatDate(u.createdAt)}
                           </td>
                           <td className="px-4 py-3">
                             <div className="flex items-center gap-2 justify-end">
+                              {!u.emailVerified && (
+                                <button
+                                  onClick={() => resendVerification(u)}
+                                  className="text-gray-300 hover:text-blue-500 transition-colors"
+                                  title="Resend verification email"
+                                >
+                                  <Send className="w-4 h-4" />
+                                </button>
+                              )}
+                              {u.role !== 'admin' && (
+                                <button
+                                  onClick={() => toggleActive(u)}
+                                  className={`transition-colors ${u.isActive ? 'text-gray-300 hover:text-red-500' : 'text-gray-300 hover:text-green-500'}`}
+                                  title={u.isActive ? 'Deactivate account' : 'Reactivate account'}
+                                >
+                                  {u.isActive ? <UserX className="w-4 h-4" /> : <UserCheck2 className="w-4 h-4" />}
+                                </button>
+                              )}
                               <button
                                 onClick={() => viewDocuments(u)}
                                 className="text-gold-500 hover:text-gold-600 transition-colors"
@@ -363,6 +454,16 @@ export default function AdminDashboard() {
                       <X className="w-4 h-4" />
                     </button>
                   </div>
+                  <div className="px-4 pt-3">
+                    <button
+                      onClick={() => openInDropbox(viewingUser.customerId)}
+                      disabled={openingDropbox}
+                      className="w-full flex items-center justify-center gap-1.5 text-xs font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg py-2 transition-colors disabled:opacity-60"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" />
+                      {openingDropbox ? 'Opening…' : 'Open Folder in Dropbox'}
+                    </button>
+                  </div>
                   <div className="flex-1 overflow-y-auto p-4 space-y-2">
                     {filesLoading && (
                       <div className="flex items-center justify-center py-8 gap-2 text-gray-400">
@@ -383,7 +484,7 @@ export default function AdminDashboard() {
                         <FileText className="w-4 h-4 text-gold-500 shrink-0" />
                         <div className="flex-1 min-w-0">
                           <p className="text-xs font-medium text-navy-800 truncate">{f.name}</p>
-                          <p className="text-gray-400 text-[10px]">{formatFileSize(f.size)}</p>
+                          <p className="text-gray-400 text-[10px]">{f.category} · {formatFileSize(f.size)}</p>
                         </div>
                         <button
                           onClick={() => handleDownload(f.path)}

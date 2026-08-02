@@ -1,4 +1,8 @@
 import { Dropbox, DropboxAuth } from 'dropbox';
+import { DOCUMENT_CATEGORIES, type DocumentCategory } from './dropboxCategories';
+
+export { DOCUMENT_CATEGORIES };
+export type { DocumentCategory };
 
 function getDropboxClient(): Dropbox {
   const appKey     = process.env.DROPBOX_APP_KEY;
@@ -28,11 +32,13 @@ function getDropboxClient(): Dropbox {
 export async function uploadToDropbox(
   customerId: string,
   fileName: string,
-  contents: Buffer
+  contents: Buffer,
+  category: string = 'Other'
 ): Promise<string> {
   const dbx = getDropboxClient();
   const safeName = fileName.replace(/[^\w.\-]/g, '_');
-  const path = `/GoldenDollarConsultancy/${customerId}/${safeName}`;
+  const safeCategory = DOCUMENT_CATEGORIES.includes(category as DocumentCategory) ? category : 'Other';
+  const path = `/GoldenDollarConsultancy/${customerId}/${safeCategory}/${safeName}`;
 
   const response = await dbx.filesUpload({
     path,
@@ -50,15 +56,22 @@ export async function listDropboxFiles(customerId: string) {
   const path = `/GoldenDollarConsultancy/${customerId}`;
 
   try {
-    const response = await dbx.filesListFolder({ path });
+    const response = await dbx.filesListFolder({ path, recursive: true });
     return response.result.entries
       .filter((e) => e['.tag'] === 'file')
-      .map((e) => ({
-        name: e.name,
-        path: e.path_display ?? '',
-        size: (e as any).size ?? 0,
-        modified: (e as any).server_modified ?? '',
-      }));
+      .map((e) => {
+        const fullPath = e.path_display ?? '';
+        // Path shape: /GoldenDollarConsultancy/{customerId}/{category}/{filename}
+        const segments = fullPath.split('/').filter(Boolean);
+        const category = segments.length >= 4 ? segments[2] : 'Other';
+        return {
+          name: e.name,
+          path: fullPath,
+          size: (e as any).size ?? 0,
+          modified: (e as any).server_modified ?? '',
+          category,
+        };
+      });
   } catch (error: any) {
     const summary: string = error?.error?.error_summary ?? '';
     if (summary.startsWith('path/not_found')) return [];
@@ -70,4 +83,27 @@ export async function getTemporaryLink(filePath: string): Promise<string> {
   const dbx = getDropboxClient();
   const response = await dbx.filesGetTemporaryLink({ path: filePath });
   return response.result.link;
+}
+
+/**
+ * Returns a shareable Dropbox link to a customer's whole document folder, so
+ * staff can open it directly in Dropbox (browsing, bulk download, etc.)
+ * instead of only using the in-app file list. Reuses an existing shared link
+ * if one was already created, since Dropbox errors on creating a duplicate.
+ */
+export async function getOrCreateFolderShareLink(customerId: string): Promise<string> {
+  const dbx = getDropboxClient();
+  const path = `/GoldenDollarConsultancy/${customerId}`;
+
+  try {
+    const created = await dbx.sharingCreateSharedLinkWithSettings({ path });
+    return created.result.url;
+  } catch (error: any) {
+    const summary: string = error?.error?.error_summary ?? '';
+    if (summary.startsWith('shared_link_already_exists')) {
+      const existing = await dbx.sharingListSharedLinks({ path, direct_only: true });
+      if (existing.result.links.length > 0) return existing.result.links[0].url;
+    }
+    throw error;
+  }
 }

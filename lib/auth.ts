@@ -62,6 +62,9 @@ export const authOptions: NextAuthOptions = {
         const isValid = await bcrypt.compare(credentials.password, user.password);
         if (!isValid) return null;
 
+        if (!user.isActive) throw new Error('ACCOUNT_DEACTIVATED');
+        if (!user.emailVerified) throw new Error('EMAIL_NOT_VERIFIED');
+
         // Step 2: password already verified, an OTP was submitted
         if (credentials.otp) {
           if (!user.mfaCode || !user.mfaCodeExpires) throw new Error('MFA_REQUIRED');
@@ -155,9 +158,12 @@ export const authOptions: NextAuthOptions = {
             email,
             customerId,
             // No local password — this account signs in via Microsoft only
+            emailVerified: new Date(), // Microsoft already verified this email address
           },
         });
       }
+
+      if (!dbUser.isActive) return '/portal/login?error=AccountDeactivated';
 
       // Stamp the internal identity onto the OAuth user object so the jwt
       // callback below picks up our id/role/customerId instead of Azure's.
@@ -172,6 +178,21 @@ export const authOptions: NextAuthOptions = {
         token.id = user.id;
         token.customerId = (user as any).customerId;
         token.role = (user as any).role;
+        token.isActive = true; // just completed a fresh sign-in
+      } else if (token.id) {
+        // Re-check on every session refresh so deactivation/role changes take
+        // effect without waiting for the 30-day JWT to expire.
+        const dbUser = await prisma.user.findUnique({
+          where: { id: token.id },
+          select: { role: true, isActive: true, customerId: true },
+        });
+        if (dbUser) {
+          token.role = dbUser.role;
+          token.isActive = dbUser.isActive;
+          token.customerId = dbUser.customerId;
+        } else {
+          token.isActive = false; // account no longer exists
+        }
       }
       return token;
     },

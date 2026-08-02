@@ -3,13 +3,22 @@
 import { useEffect, useState, useCallback } from 'react';
 import { FileText, Image as ImageIcon, Table2, File, Download, RefreshCw, FolderOpen } from 'lucide-react';
 import { formatFileSize, formatDate, getFileIcon } from '@/lib/utils';
+import { DOCUMENT_CATEGORIES } from '@/lib/dropboxCategories';
 
 interface FileItem {
   name: string;
   path: string;
   size: number;
   modified: string;
+  category: string;
 }
+
+const CATEGORY_COLORS: Record<string, string> = {
+  Tax: 'bg-green-50 text-green-700',
+  Immigration: 'bg-blue-50 text-blue-700',
+  'Company Registration': 'bg-purple-50 text-purple-700',
+  Other: 'bg-gray-100 text-gray-600',
+};
 
 function FileIcon({ type }: { type: string }) {
   const base = 'w-8 h-8 rounded-lg flex items-center justify-center shrink-0';
@@ -23,6 +32,7 @@ export default function FileList({ refreshKey }: { refreshKey: number }) {
   const [files, setFiles] = useState<FileItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState<string>('all');
 
   const fetchFiles = useCallback(async () => {
     setLoading(true);
@@ -86,28 +96,47 @@ export default function FileList({ refreshKey }: { refreshKey: number }) {
     );
   }
 
+  const filteredFiles = categoryFilter === 'all' ? files : files.filter((f) => f.category === categoryFilter);
+
   return (
     <div>
-      <div className="flex items-center justify-between mb-4">
-        <p className="text-sm text-gray-500">{files.length} document{files.length !== 1 ? 's' : ''}</p>
-        <button
-          onClick={fetchFiles}
-          className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-navy-700 transition-colors"
-        >
-          <RefreshCw className="w-3.5 h-3.5" />
-          Refresh
-        </button>
+      <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
+        <p className="text-sm text-gray-500">{filteredFiles.length} document{filteredFiles.length !== 1 ? 's' : ''}</p>
+        <div className="flex items-center gap-3">
+          <select
+            value={categoryFilter}
+            onChange={(e) => setCategoryFilter(e.target.value)}
+            className="text-xs border border-gray-200 rounded-lg px-2.5 py-1.5 text-navy-800 focus:outline-none focus:ring-2 focus:ring-gold-400/20 bg-white"
+          >
+            <option value="all">All Types</option>
+            {DOCUMENT_CATEGORIES.map((c) => (
+              <option key={c} value={c}>{c}</option>
+            ))}
+          </select>
+          <button
+            onClick={fetchFiles}
+            className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-navy-700 transition-colors"
+          >
+            <RefreshCw className="w-3.5 h-3.5" />
+            Refresh
+          </button>
+        </div>
       </div>
 
       <div className="space-y-2">
-        {files.map((file) => (
+        {filteredFiles.map((file) => (
           <div
             key={file.path}
             className="flex items-center gap-4 p-4 bg-gray-50 hover:bg-gold-50 border border-gray-100 hover:border-gold-200 rounded-xl transition-all duration-200 group"
           >
             <FileIcon type={getFileIcon(file.name)} />
             <div className="flex-1 min-w-0">
-              <p className="font-medium text-navy-800 text-sm truncate">{file.name}</p>
+              <div className="flex items-center gap-2 flex-wrap">
+                <p className="font-medium text-navy-800 text-sm truncate">{file.name}</p>
+                <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0 ${CATEGORY_COLORS[file.category] ?? CATEGORY_COLORS.Other}`}>
+                  {file.category}
+                </span>
+              </div>
               <p className="text-gray-400 text-xs mt-0.5">
                 {formatFileSize(file.size)} · Uploaded {formatDate(file.modified)}
               </p>

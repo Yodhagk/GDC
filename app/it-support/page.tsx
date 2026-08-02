@@ -7,13 +7,17 @@ import {
   Users, Shield, RefreshCw, LogOut, Eye,
   Database, Server, Activity, Search,
   FileText, Download, X, TicketIcon, ChevronDown,
-  CheckCircle2, Clock, Send,
+  CheckCircle2, Clock, Send, MailCheck, AlertCircle,
+  UserX, UserCheck2, ExternalLink,
 } from 'lucide-react';
 import { formatFileSize } from '@/lib/utils';
 import toast from 'react-hot-toast';
 
-type UserRow = { id: string; name: string; email: string; customerId: string; role: string; createdAt: string };
-type FileItem = { name: string; path: string; size: number; modified: string };
+type UserRow = {
+  id: string; name: string; email: string; customerId: string; role: string;
+  isActive: boolean; emailVerified: string | null; createdAt: string;
+};
+type FileItem = { name: string; path: string; size: number; modified: string; category: string };
 type Stats = { totalUsers: number; clientCount: number; adminCount: number; itCount: number };
 type Ticket = {
   id: string; ticketNo: string; subject: string; category: string;
@@ -103,6 +107,50 @@ export default function ITSupportDashboard() {
       const { url } = await res.json();
       window.open(url, '_blank');
     } catch { toast.error('Could not generate download link'); }
+  };
+
+  const [openingDropbox, setOpeningDropbox] = useState(false);
+  const openInDropbox = async (customerId: string) => {
+    setOpeningDropbox(true);
+    try {
+      const res = await fetch(`/api/admin/documents/dropbox-link?customerId=${customerId}`);
+      if (!res.ok) throw new Error();
+      const { url } = await res.json();
+      window.open(url, '_blank');
+    } catch { toast.error('Could not open Dropbox folder'); }
+    finally { setOpeningDropbox(false); }
+  };
+
+  const patchUser = async (id: string, body: Record<string, unknown>) => {
+    const res = await fetch('/api/admin/users', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, ...body }),
+    });
+    if (res.ok) {
+      const d = await res.json();
+      setAllUsers((prev) => prev.map((u) => (u.id === id ? { ...u, ...d.user } : u)));
+    } else {
+      const d = await res.json().catch(() => ({}));
+      toast.error(d.error ?? 'Update failed');
+    }
+    return res.ok;
+  };
+
+  const toggleActive = async (u: UserRow) => {
+    const next = !u.isActive;
+    if (!next && !confirm(`Deactivate "${u.name}"? They will be signed out and unable to log in until reactivated.`)) return;
+    if (await patchUser(u.id, { isActive: next })) {
+      toast.success(next ? `${u.name} reactivated` : `${u.name} deactivated`);
+    }
+  };
+
+  const forceVerify = async (u: UserRow) => {
+    if (await patchUser(u.id, { forceVerify: true })) toast.success(`${u.name}'s email marked as verified`);
+  };
+
+  const resendVerification = async (u: UserRow) => {
+    if (await patchUser(u.id, { resendVerification: true })) toast.success(`Verification email resent to ${u.email}`);
   };
 
   const updateTicket = async (id: string, status: string, response?: string) => {
@@ -405,12 +453,37 @@ export default function ITSupportDashboard() {
                           {u.name[0].toUpperCase()}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-navy-800 truncate">{u.name}</p>
+                          <div className="flex items-center gap-2">
+                            <p className="text-sm font-medium text-navy-800 truncate">{u.name}</p>
+                            {!u.isActive && (
+                              <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-red-50 text-red-600 shrink-0">
+                                Deactivated
+                              </span>
+                            )}
+                          </div>
                           <p className="text-xs text-gray-400 truncate">{u.email}</p>
                         </div>
-                        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${ROLE_COLORS[u.role] ?? 'bg-gray-100 text-gray-600'}`}>
+                        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0 ${ROLE_COLORS[u.role] ?? 'bg-gray-100 text-gray-600'}`}>
                           {ROLE_LABELS[u.role] ?? u.role}
                         </span>
+                        {u.emailVerified ? (
+                          <span className="shrink-0" title="Email verified">
+                            <MailCheck className="w-3.5 h-3.5 text-green-500" />
+                          </span>
+                        ) : (
+                          <button onClick={() => resendVerification(u)} className="shrink-0" title="Unverified — click to resend">
+                            <AlertCircle className="w-3.5 h-3.5 text-amber-500" />
+                          </button>
+                        )}
+                        {u.role === 'client' && (
+                          <button
+                            onClick={() => toggleActive(u)}
+                            className={`shrink-0 transition-colors ${u.isActive ? 'text-gray-300 hover:text-red-500' : 'text-gray-300 hover:text-green-500'}`}
+                            title={u.isActive ? 'Deactivate account' : 'Reactivate account'}
+                          >
+                            {u.isActive ? <UserX className="w-4 h-4" /> : <UserCheck2 className="w-4 h-4" />}
+                          </button>
+                        )}
                         <button onClick={() => viewDocuments(u)}
                           className="text-amber-500 hover:text-amber-600 transition-colors shrink-0" title="View documents">
                           <Eye className="w-4 h-4" />
@@ -432,6 +505,25 @@ export default function ITSupportDashboard() {
                         <X className="w-4 h-4" />
                       </button>
                     </div>
+                    <div className="px-4 pt-3 flex gap-2">
+                      <button
+                        onClick={() => openInDropbox(viewingUser.customerId)}
+                        disabled={openingDropbox}
+                        className="flex-1 flex items-center justify-center gap-1.5 text-xs font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg py-2 transition-colors disabled:opacity-60"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5" />
+                        {openingDropbox ? 'Opening…' : 'Open in Dropbox'}
+                      </button>
+                      {!viewingUser.emailVerified && (
+                        <button
+                          onClick={() => forceVerify(viewingUser)}
+                          className="flex-1 flex items-center justify-center gap-1.5 text-xs font-semibold text-amber-600 bg-amber-50 hover:bg-amber-100 rounded-lg py-2 transition-colors"
+                        >
+                          <MailCheck className="w-3.5 h-3.5" />
+                          Force Verify Email
+                        </button>
+                      )}
+                    </div>
                     <div className="p-4">
                       {filesLoading ? (
                         <div className="flex items-center justify-center py-6 gap-2 text-gray-400">
@@ -446,7 +538,7 @@ export default function ITSupportDashboard() {
                               <FileText className="w-4 h-4 text-amber-500 shrink-0" />
                               <div className="flex-1 min-w-0">
                                 <p className="text-xs font-medium text-navy-800 truncate">{f.name}</p>
-                                <p className="text-gray-400 text-[10px]">{formatFileSize(f.size)}</p>
+                                <p className="text-gray-400 text-[10px]">{f.category} · {formatFileSize(f.size)}</p>
                               </div>
                               <button onClick={() => handleDownload(f.path)}
                                 className="opacity-0 group-hover:opacity-100 transition-opacity text-amber-500 hover:text-amber-600">

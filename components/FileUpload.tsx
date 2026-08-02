@@ -5,6 +5,7 @@ import { useDropzone } from 'react-dropzone';
 import { UploadCloud, File, CheckCircle, XCircle, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { formatFileSize, MAX_FILE_SIZE } from '@/lib/utils';
+import { DOCUMENT_CATEGORIES } from '@/lib/dropboxCategories';
 
 type UploadStatus = 'idle' | 'uploading' | 'success' | 'error';
 
@@ -16,6 +17,7 @@ export default function FileUpload({ onUploadSuccess }: FileUploadProps) {
   const [status, setStatus] = useState<UploadStatus>('idle');
   const [progress, setProgress] = useState(0);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [category, setCategory] = useState<string>(DOCUMENT_CATEGORIES[0]);
   const [errorMsg, setErrorMsg] = useState('');
 
   const onDrop = useCallback((accepted: File[], rejected: any[]) => {
@@ -59,6 +61,7 @@ export default function FileUpload({ onUploadSuccess }: FileUploadProps) {
 
     const formData = new FormData();
     formData.append('file', selectedFile);
+    formData.append('category', category);
 
     const xhr = new XMLHttpRequest();
 
@@ -109,6 +112,20 @@ export default function FileUpload({ onUploadSuccess }: FileUploadProps) {
 
   return (
     <div className="space-y-4">
+      {/* Document category */}
+      <div>
+        <label className="block text-sm font-medium text-navy-800 mb-1.5">Document Type</label>
+        <select
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+          className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-navy-800 focus:outline-none focus:border-gold-400 focus:ring-2 focus:ring-gold-400/20 transition-all bg-white"
+        >
+          {DOCUMENT_CATEGORIES.map((c) => (
+            <option key={c} value={c}>{c}</option>
+          ))}
+        </select>
+      </div>
+
       {/* Drop zone */}
       {!selectedFile && (
         <div

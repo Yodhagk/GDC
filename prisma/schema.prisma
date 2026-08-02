@@ -8,12 +8,17 @@ datasource db {
 }
 
 model User {
-  id              String    @id @default(cuid())
-  name            String
-  email           String    @unique
-  password        String    @default("")
-  customerId      String    @unique
-  role            String    @default("client") // client | admin | it_support
+  id                       String    @id @default(cuid())
+  name                     String
+  email                    String    @unique
+  password                 String    @default("")
+  customerId               String    @unique
+  role                     String    @default("client") // client | admin | it_support
+  isActive                 Boolean   @default(true) // false = deactivated by IT support/admin, login blocked
+  emailVerified            DateTime? // null until verified; OAuth sign-ins are auto-verified
+  verifyEmailToken         String?   // sha256 hash of the current verification token
+  verifyEmailTokenExpires  DateTime?
+  verifyEmailIssuedAt      DateTime? // for resend throttling
   mfaCode         String?   // sha256 hash of the current login OTP
   mfaCodeExpires  DateTime?
   mfaCodeIssuedAt DateTime?
