@@ -8,7 +8,7 @@ import { Eye, EyeOff, KeyRound, AlertCircle, CheckCircle } from 'lucide-react';
 function ResetPasswordForm() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const token = searchParams.get('token') || '';
+  const token = searchParams?.get('token') || '';
 
   const [form, setForm] = useState({ password: '', confirm: '' });
   const [showPassword, setShowPassword] = useState(false);
