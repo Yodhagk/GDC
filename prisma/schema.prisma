@@ -8,15 +8,31 @@ datasource db {
 }
 
 model User {
-  id         String   @id @default(cuid())
-  name       String
-  email      String   @unique
-  password   String   @default("")
-  customerId String   @unique
-  role       String   @default("client") // client | admin | it_support
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  tickets    Ticket[]
+  id              String    @id @default(cuid())
+  name            String
+  email           String    @unique
+  password        String    @default("")
+  customerId      String    @unique
+  role            String    @default("client") // client | admin | it_support
+  mfaCode         String?   // sha256 hash of the current login OTP
+  mfaCodeExpires  DateTime?
+  mfaCodeIssuedAt DateTime?
+  mfaAttempts     Int       @default(0)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  tickets         Ticket[]
+  resetTokens     PasswordResetToken[]
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String   @unique // sha256 hash of the raw token sent by email
+  expires   DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
 }
 
 model Ticket {

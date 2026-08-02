@@ -73,6 +73,63 @@ export async function sendTicketCreatedEmail(opts: {
   });
 }
 
+export async function sendPasswordResetEmail(opts: {
+  name: string;
+  email: string;
+  resetUrl: string;
+}) {
+  if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+    console.log(`[DEV] Password reset link for ${opts.email}: ${opts.resetUrl}`);
+    return;
+  }
+
+  const transporter = getTransporter();
+
+  await transporter.sendMail({
+    from: FROM,
+    to: opts.email,
+    subject: 'Reset Your Golden Dollar Consultancy Password',
+    html: `
+      <div style="font-family:sans-serif;max-width:600px">
+        <h2 style="color:#0a1628">Password Reset Request</h2>
+        <p>Hi ${opts.name},</p>
+        <p>We received a request to reset the password for your client portal account. Click the button below to choose a new password. This link expires in <strong>1 hour</strong>.</p>
+        <p style="margin:24px 0">
+          <a href="${opts.resetUrl}" style="background:#d4a018;color:#0a1628;font-weight:bold;text-decoration:none;padding:12px 28px;border-radius:8px;display:inline-block">Reset Password</a>
+        </p>
+        <p style="color:#666;font-size:13px">If the button doesn't work, copy and paste this link into your browser:<br/>${opts.resetUrl}</p>
+        <p style="color:#666;font-size:13px">If you didn't request this, you can safely ignore this email — your password will not change.</p>
+        <p style="color:#666;font-size:13px">Golden Dollar Consultancy · +1 (469) 269-9784</p>
+      </div>`,
+  });
+}
+
+export async function sendMfaCodeEmail(opts: { name: string; email: string; code: string }) {
+  if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+    console.log(`[DEV] MFA code for ${opts.email}: ${opts.code}`);
+    return;
+  }
+
+  const transporter = getTransporter();
+
+  await transporter.sendMail({
+    from: FROM,
+    to: opts.email,
+    subject: `${opts.code} is your Golden Dollar Consultancy verification code`,
+    html: `
+      <div style="font-family:sans-serif;max-width:600px">
+        <h2 style="color:#0a1628">Your Verification Code</h2>
+        <p>Hi ${opts.name},</p>
+        <p>Use this code to finish signing in to your portal. It expires in <strong>10 minutes</strong>.</p>
+        <div style="background:#f8f9fa;border:1px solid #e5e7eb;border-radius:12px;padding:20px;margin:20px 0;text-align:center">
+          <span style="font-size:32px;font-weight:bold;letter-spacing:8px;color:#0a1628">${opts.code}</span>
+        </div>
+        <p style="color:#666;font-size:13px">If you didn't try to sign in, someone may have your password — please reset it immediately.</p>
+        <p style="color:#666;font-size:13px">Golden Dollar Consultancy · +1 (469) 269-9784</p>
+      </div>`,
+  });
+}
+
 export async function sendTicketResolvedEmail(opts: {
   clientName: string;
   clientEmail: string;

@@ -25,7 +25,13 @@ export default withAuth(
     callbacks: {
       authorized: ({ token, req }) => {
         const { pathname } = req.nextUrl;
-        if (pathname === '/portal/login' || pathname === '/portal/register') {
+        const publicPortalPages = [
+          '/portal/login',
+          '/portal/register',
+          '/portal/forgot-password',
+          '/portal/reset-password',
+        ];
+        if (publicPortalPages.includes(pathname)) {
           return true;
         }
         return !!token;
