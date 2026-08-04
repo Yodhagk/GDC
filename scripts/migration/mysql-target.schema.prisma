@@ -1,0 +1,57 @@
+// Write-target client for the SQLite → MySQL migration.
+// Same models as prisma/schema.prisma, mysql provider, throwaway output dir.
+// Used only by migrate.cjs — the app keeps using the sqlite-provider
+// prisma/schema.prisma until the migration is verified and we cut over.
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "./generated/mysql-client"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("MYSQL_DATABASE_URL")
+}
+
+model User {
+  id              String    @id @default(cuid())
+  name            String
+  email           String    @unique
+  password        String    @default("")
+  customerId      String    @unique
+  role            String    @default("client")
+  mfaCode         String?
+  mfaCodeExpires  DateTime?
+  mfaCodeIssuedAt DateTime?
+  mfaAttempts     Int       @default(0)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  tickets         Ticket[]
+  resetTokens     PasswordResetToken[]
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String   @unique
+  expires   DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model Ticket {
+  id         String   @id @default(cuid())
+  ticketNo   String   @unique
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subject    String
+  category   String
+  priority   String   @default("medium")
+  status     String   @default("open")
+  message    String
+  response   String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
