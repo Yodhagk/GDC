@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
-import { uploadToDropbox, DOCUMENT_CATEGORIES } from '@/lib/dropbox';
+import { uploadToDropbox, uploadToBackup, canTransfer, DOCUMENT_CATEGORIES } from '@/lib/dropbox';
 import { ALLOWED_MIME_TYPES, MAX_FILE_SIZE } from '@/lib/utils';
 
 export const runtime = 'nodejs';
@@ -11,6 +11,13 @@ export async function POST(req: NextRequest) {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized. Please sign in.' }, { status: 401 });
+    }
+
+    if (!canTransfer(session.user as any)) {
+      return NextResponse.json(
+        { error: 'Uploads require the Backup plan ($25/month).', code: 'UPGRADE_REQUIRED' },
+        { status: 403 }
+      );
     }
 
     const customerId = (session.user as any).customerId as string;
@@ -50,7 +57,10 @@ export async function POST(req: NextRequest) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    const path = await uploadToDropbox(customerId, file.name, buffer, category);
+    const path =
+      formData.get('target') === 'backup'
+        ? await uploadToBackup(customerId, file.name, buffer, String(formData.get('folder') ?? ''))
+        : await uploadToDropbox(customerId, file.name, buffer, category);
 
     return NextResponse.json({ success: true, path }, { status: 200 });
   } catch (error: any) {

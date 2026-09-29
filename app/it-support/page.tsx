@@ -12,12 +12,13 @@ import {
 } from 'lucide-react';
 import { formatFileSize } from '@/lib/utils';
 import toast from 'react-hot-toast';
+import CustomerFiles from '@/components/CustomerFiles';
+import BackupStatus from '@/components/BackupStatus';
 
 type UserRow = {
   id: string; name: string; email: string; customerId: string; role: string;
-  isActive: boolean; emailVerified: string | null; createdAt: string;
+  isActive: boolean; backupPlan: boolean; emailVerified: string | null; createdAt: string;
 };
-type FileItem = { name: string; path: string; size: number; modified: string; category: string };
 type Stats = { totalUsers: number; clientCount: number; adminCount: number; itCount: number };
 type Ticket = {
   id: string; ticketNo: string; subject: string; category: string;
@@ -50,14 +51,12 @@ export default function ITSupportDashboard() {
   const { data: session, status } = useSession();
   const router = useRouter();
 
-  const [activeTab, setActiveTab] = useState<'users' | 'tickets'>('tickets');
+  const [activeTab, setActiveTab] = useState<'users' | 'tickets' | 'backup'>('tickets');
   const [stats, setStats] = useState<Stats | null>(null);
   const [allUsers, setAllUsers] = useState<UserRow[]>([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [viewingUser, setViewingUser] = useState<UserRow | null>(null);
-  const [userFiles, setUserFiles] = useState<FileItem[]>([]);
-  const [filesLoading, setFilesLoading] = useState(false);
 
   // Ticket state
   const [tickets, setTickets] = useState<Ticket[]>([]);
@@ -91,23 +90,7 @@ export default function ITSupportDashboard() {
     fetchData().finally(() => setLoading(false));
   }, [status, fetchData]);
 
-  const viewDocuments = async (u: UserRow) => {
-    setViewingUser(u);
-    setUserFiles([]);
-    setFilesLoading(true);
-    const res = await fetch(`/api/admin/documents?customerId=${u.customerId}`);
-    if (res.ok) { const d = await res.json(); setUserFiles(d.files ?? []); }
-    setFilesLoading(false);
-  };
-
-  const handleDownload = async (path: string) => {
-    try {
-      const res = await fetch(`/api/files/download?path=${encodeURIComponent(path)}`);
-      if (!res.ok) throw new Error();
-      const { url } = await res.json();
-      window.open(url, '_blank');
-    } catch { toast.error('Could not generate download link'); }
-  };
+  const viewDocuments = (u: UserRow) => setViewingUser(u);
 
   const [openingDropbox, setOpeningDropbox] = useState(false);
   const openInDropbox = async (customerId: string) => {
@@ -280,12 +263,20 @@ export default function ITSupportDashboard() {
                   }`}>
                   Users ({allUsers.length})
                 </button>
+                <button onClick={() => setActiveTab('backup')}
+                  className={`flex-1 py-2 text-xs font-semibold rounded-xl transition-colors ${
+                    activeTab === 'backup' ? 'bg-amber-400 text-navy-900' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                  }`}>
+                  Backup
+                </button>
               </div>
             </div>
           </div>
 
           {/* Main panel */}
           <div className="lg:col-span-2 space-y-4">
+
+            {activeTab === 'backup' && <BackupStatus />}
 
             {/* ── TICKETS TAB ── */}
             {activeTab === 'tickets' && (
@@ -525,29 +516,12 @@ export default function ITSupportDashboard() {
                       )}
                     </div>
                     <div className="p-4">
-                      {filesLoading ? (
-                        <div className="flex items-center justify-center py-6 gap-2 text-gray-400">
-                          <RefreshCw className="w-4 h-4 animate-spin" /><span className="text-xs">Loading…</span>
-                        </div>
-                      ) : userFiles.length === 0 ? (
-                        <p className="text-gray-400 text-xs text-center py-6">No documents uploaded.</p>
-                      ) : (
-                        <div className="space-y-2">
-                          {userFiles.map((f) => (
-                            <div key={f.path} className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl hover:bg-amber-50 transition-colors group">
-                              <FileText className="w-4 h-4 text-amber-500 shrink-0" />
-                              <div className="flex-1 min-w-0">
-                                <p className="text-xs font-medium text-navy-800 truncate">{f.name}</p>
-                                <p className="text-gray-400 text-[10px]">{f.category} · {formatFileSize(f.size)}</p>
-                              </div>
-                              <button onClick={() => handleDownload(f.path)}
-                                className="opacity-0 group-hover:opacity-100 transition-opacity text-amber-500 hover:text-amber-600">
-                                <Download className="w-3.5 h-3.5" />
-                              </button>
-                            </div>
-                          ))}
-                        </div>
-                      )}
+                      <CustomerFiles
+                        key={viewingUser.id}
+                        customerId={viewingUser.customerId}
+                        backupPlan={!!(allUsers.find((x) => x.id === viewingUser.id) ?? viewingUser).backupPlan}
+                        onToggleBackup={(next) => patchUser(viewingUser.id, { backupPlan: next }).then((ok) => ok && toast.success(next ? 'Backup plan activated' : 'Backup plan turned off'))}
+                      />
                     </div>
                   </div>
                 )}

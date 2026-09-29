@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
-import { listDropboxFiles } from '@/lib/dropbox';
+import type { FileArea } from '@/lib/dropbox';
+import { getEntriesFor } from '@/lib/sync';
 
 export const runtime = 'nodejs';
 
@@ -12,10 +13,18 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized.' }, { status: 401 });
     }
 
-    const customerId = (session.user as any).customerId as string;
-    const files = await listDropboxFiles(customerId);
+    const user = session.user as any;
+    const area: FileArea = req.nextUrl.searchParams.get('area') === 'backup' ? 'backup' : 'documents';
+    if (area === 'backup' && !user.backupPlan) {
+      return NextResponse.json(
+        { error: 'Upgrade to the Backup plan to use backup folders.', code: 'UPGRADE_REQUIRED' },
+        { status: 403 }
+      );
+    }
 
-    return NextResponse.json({ files }, { status: 200 });
+    const { files, folders, sync } = await getEntriesFor(user, user.customerId as string, area);
+
+    return NextResponse.json({ files, folders, sync }, { status: 200 });
   } catch (error: any) {
     console.error('Files list error:', error?.message ?? error);
     return NextResponse.json(

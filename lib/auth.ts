@@ -179,17 +179,19 @@ export const authOptions: NextAuthOptions = {
         token.customerId = (user as any).customerId;
         token.role = (user as any).role;
         token.isActive = true; // just completed a fresh sign-in
+        token.backupPlan = false; // refreshed from the DB on the next session read
       } else if (token.id) {
         // Re-check on every session refresh so deactivation/role changes take
         // effect without waiting for the 30-day JWT to expire.
         const dbUser = await prisma.user.findUnique({
           where: { id: token.id },
-          select: { role: true, isActive: true, customerId: true },
+          select: { role: true, isActive: true, customerId: true, backupPlan: true },
         });
         if (dbUser) {
           token.role = dbUser.role;
           token.isActive = dbUser.isActive;
           token.customerId = dbUser.customerId;
+          token.backupPlan = dbUser.backupPlan;
         } else {
           token.isActive = false; // account no longer exists
         }
@@ -201,6 +203,7 @@ export const authOptions: NextAuthOptions = {
         (session.user as any).id = token.id;
         (session.user as any).customerId = token.customerId;
         (session.user as any).role = token.role;
+        (session.user as any).backupPlan = !!token.backupPlan;
       }
       return session;
     },

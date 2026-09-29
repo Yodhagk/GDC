@@ -11,9 +11,14 @@ type UploadStatus = 'idle' | 'uploading' | 'success' | 'error';
 
 interface FileUploadProps {
   onUploadSuccess: () => void;
+  /** `backup` uploads to the customer's Backup folder (optional subfolder) instead of a document category. */
+  target?: 'documents' | 'backup';
+  /** Backup destination subfolder; controlled by the parent so the folder tree can set it. */
+  folder?: string;
+  onFolderChange?: (folder: string) => void;
 }
 
-export default function FileUpload({ onUploadSuccess }: FileUploadProps) {
+export default function FileUpload({ onUploadSuccess, target = 'documents', folder = '', onFolderChange }: FileUploadProps) {
   const [status, setStatus] = useState<UploadStatus>('idle');
   const [progress, setProgress] = useState(0);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -62,6 +67,8 @@ export default function FileUpload({ onUploadSuccess }: FileUploadProps) {
     const formData = new FormData();
     formData.append('file', selectedFile);
     formData.append('category', category);
+    formData.append('target', target);
+    if (target === 'backup') formData.append('folder', folder);
 
     const xhr = new XMLHttpRequest();
 
@@ -112,7 +119,21 @@ export default function FileUpload({ onUploadSuccess }: FileUploadProps) {
 
   return (
     <div className="space-y-4">
-      {/* Document category */}
+      {/* Document category, or backup subfolder */}
+      {target === 'backup' ? (
+        <div>
+          <label className="block text-sm font-medium text-navy-800 mb-1.5">
+            Upload to folder <span className="text-gray-400 font-normal">(select one in the tree, or type a new path like 2026/Tax)</span>
+          </label>
+          <input
+            value={folder}
+            onChange={(e) => onFolderChange?.(e.target.value)}
+            maxLength={120}
+            placeholder="Top level"
+            className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-navy-800 focus:outline-none focus:border-gold-400 focus:ring-2 focus:ring-gold-400/20 transition-all bg-white"
+          />
+        </div>
+      ) : (
       <div>
         <label className="block text-sm font-medium text-navy-800 mb-1.5">Document Type</label>
         <select
@@ -125,6 +146,7 @@ export default function FileUpload({ onUploadSuccess }: FileUploadProps) {
           ))}
         </select>
       </div>
+      )}
 
       {/* Drop zone */}
       {!selectedFile && (

@@ -11,6 +11,9 @@ import {
 } from 'lucide-react';
 import { formatDate, formatFileSize, getFileIcon } from '@/lib/utils';
 import toast from 'react-hot-toast';
+import CustomerFiles from '@/components/CustomerFiles';
+import BackupRootPicker from '@/components/BackupRootPicker';
+import BackupStatus from '@/components/BackupStatus';
 
 type UserRow = {
   id: string;
@@ -19,11 +22,11 @@ type UserRow = {
   customerId: string;
   role: string;
   isActive: boolean;
+  backupPlan: boolean;
   emailVerified: string | null;
   createdAt: string;
 };
 
-type FileItem = { name: string; path: string; size: number; modified: string; category: string };
 
 type Stats = { totalUsers: number; clientCount: number; adminCount: number; itCount: number };
 
@@ -47,13 +50,11 @@ export default function AdminDashboard() {
   const [recentUsers, setRecentUsers] = useState<UserRow[]>([]);
   const [allUsers, setAllUsers] = useState<UserRow[]>([]);
   const [search, setSearch] = useState('');
-  const [activeTab, setActiveTab] = useState<'overview' | 'users'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'backup'>('overview');
   const [loading, setLoading] = useState(true);
 
   // Document viewer state
   const [viewingUser, setViewingUser] = useState<UserRow | null>(null);
-  const [userFiles, setUserFiles] = useState<FileItem[]>([]);
-  const [filesLoading, setFilesLoading] = useState(false);
 
   // Role change state
   const [roleMenu, setRoleMenu] = useState<string | null>(null);
@@ -146,28 +147,7 @@ export default function AdminDashboard() {
     if (await patchUser(u.id, { resendVerification: true })) toast.success(`Verification email resent to ${u.email}`);
   };
 
-  const viewDocuments = async (u: UserRow) => {
-    setViewingUser(u);
-    setUserFiles([]);
-    setFilesLoading(true);
-    const res = await fetch(`/api/admin/documents?customerId=${u.customerId}`);
-    if (res.ok) {
-      const data = await res.json();
-      setUserFiles(data.files ?? []);
-    }
-    setFilesLoading(false);
-  };
-
-  const handleDownload = async (path: string) => {
-    try {
-      const res = await fetch(`/api/files/download?path=${encodeURIComponent(path)}`);
-      if (!res.ok) throw new Error();
-      const { url } = await res.json();
-      window.open(url, '_blank');
-    } catch {
-      toast.error('Could not generate download link');
-    }
-  };
+  const viewDocuments = (u: UserRow) => setViewingUser(u);
 
   const [openingDropbox, setOpeningDropbox] = useState(false);
   const openInDropbox = async (customerId: string) => {
@@ -228,7 +208,7 @@ export default function AdminDashboard() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Tab navigation */}
         <div className="flex gap-1 mb-8 bg-white rounded-xl p-1 shadow-sm border border-gray-100 w-fit">
-          {(['overview', 'users'] as const).map((tab) => (
+          {(['overview', 'users', 'backup'] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -238,7 +218,7 @@ export default function AdminDashboard() {
                   : 'text-gray-500 hover:text-navy-800'
               }`}
             >
-              {tab === 'overview' ? '📊 Overview' : '👥 Users'}
+              {tab === 'overview' ? '📊 Overview' : tab === 'users' ? '👥 Users' : '☁️ Backup Status'}
             </button>
           ))}
         </div>
@@ -262,6 +242,8 @@ export default function AdminDashboard() {
                 </div>
               ))}
             </div>
+
+            <BackupRootPicker />
 
             {/* Recent signups */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
@@ -301,6 +283,8 @@ export default function AdminDashboard() {
             </div>
           </>
         )}
+
+        {activeTab === 'backup' && <BackupStatus />}
 
         {activeTab === 'users' && (
           <>
@@ -444,7 +428,7 @@ export default function AdminDashboard() {
 
               {/* Document viewer panel */}
               {viewingUser && (
-                <div className="w-80 shrink-0 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
+                <div className="w-[28rem] shrink-0 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
                   <div className="px-5 py-4 border-b border-gray-50 flex items-center justify-between">
                     <div>
                       <p className="font-medium text-navy-800 text-sm">{viewingUser.name}</p>
@@ -464,36 +448,13 @@ export default function AdminDashboard() {
                       {openingDropbox ? 'Opening…' : 'Open Folder in Dropbox'}
                     </button>
                   </div>
-                  <div className="flex-1 overflow-y-auto p-4 space-y-2">
-                    {filesLoading && (
-                      <div className="flex items-center justify-center py-8 gap-2 text-gray-400">
-                        <RefreshCw className="w-4 h-4 animate-spin" />
-                        <span className="text-xs">Loading…</span>
-                      </div>
-                    )}
-                    {!filesLoading && userFiles.length === 0 && (
-                      <p className="text-gray-400 text-xs text-center py-8">
-                        No documents uploaded yet.
-                      </p>
-                    )}
-                    {userFiles.map((f) => (
-                      <div
-                        key={f.path}
-                        className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl hover:bg-gold-50 transition-colors group"
-                      >
-                        <FileText className="w-4 h-4 text-gold-500 shrink-0" />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-xs font-medium text-navy-800 truncate">{f.name}</p>
-                          <p className="text-gray-400 text-[10px]">{f.category} · {formatFileSize(f.size)}</p>
-                        </div>
-                        <button
-                          onClick={() => handleDownload(f.path)}
-                          className="opacity-0 group-hover:opacity-100 transition-opacity text-gold-500 hover:text-gold-600"
-                        >
-                          <Download className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    ))}
+                  <div className="flex-1 overflow-y-auto p-4">
+                    <CustomerFiles
+                      key={viewingUser.id}
+                      customerId={viewingUser.customerId}
+                      backupPlan={!!(allUsers.find((x) => x.id === viewingUser.id) ?? viewingUser).backupPlan}
+                      onToggleBackup={(next) => patchUser(viewingUser.id, { backupPlan: next }).then((ok) => ok && toast.success(next ? 'Backup plan activated' : 'Backup plan turned off'))}
+                    />
                   </div>
                 </div>
               )}

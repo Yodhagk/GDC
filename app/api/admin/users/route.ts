@@ -24,6 +24,7 @@ export async function GET() {
       customerId: true,
       role: true,
       isActive: true,
+      backupPlan: true,
       emailVerified: true,
       createdAt: true,
     },
@@ -56,9 +57,9 @@ export async function PATCH(request: NextRequest) {
   const actorId = (session?.user as any)?.id;
   if (!isPrivileged(actorRole)) return unauthorized();
 
-  const { id, role, isActive, forceVerify, resendVerification } = await request.json();
+  const { id, role, isActive, backupPlan, forceVerify, resendVerification } = await request.json();
   if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 });
-  if (role === undefined && isActive === undefined && !forceVerify && !resendVerification) {
+  if (role === undefined && isActive === undefined && backupPlan === undefined && !forceVerify && !resendVerification) {
     return NextResponse.json({ error: 'No changes requested' }, { status: 400 });
   }
 
@@ -87,6 +88,16 @@ export async function PATCH(request: NextRequest) {
     }
   }
 
+  // ── Backup plan ($25/mo, billed offline): admin + it_support, client accounts only ──
+  if (backupPlan !== undefined) {
+    if (typeof backupPlan !== 'boolean') {
+      return NextResponse.json({ error: 'backupPlan must be true or false' }, { status: 400 });
+    }
+    if (target.role !== 'client') {
+      return NextResponse.json({ error: 'Backup plan applies to client accounts only' }, { status: 400 });
+    }
+  }
+
   // ── Force-verify / resend: admin + it_support, any target ────────────────
   if (resendVerification && !target.emailVerified) {
     const baseUrl = process.env.NEXTAUTH_URL || request.nextUrl.origin;
@@ -96,6 +107,7 @@ export async function PATCH(request: NextRequest) {
   const data: Record<string, unknown> = {};
   if (role !== undefined) data.role = role;
   if (isActive !== undefined) data.isActive = isActive;
+  if (backupPlan !== undefined) data.backupPlan = backupPlan;
   if (forceVerify) {
     data.emailVerified = new Date();
     data.verifyEmailToken = null;
@@ -111,6 +123,7 @@ export async function PATCH(request: NextRequest) {
       id: updated.id,
       role: updated.role,
       isActive: updated.isActive,
+      backupPlan: updated.backupPlan,
       emailVerified: updated.emailVerified,
     },
   });

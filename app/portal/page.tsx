@@ -4,9 +4,10 @@ import { useState, useEffect } from 'react';
 import { useSession, signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import FileUpload from '@/components/FileUpload';
-import FileList from '@/components/FileList';
+import FileTree from '@/components/FileTree';
+import BackupUpgradeCard from '@/components/BackupUpgradeCard';
 import {
-  Copy, LogOut, UploadCloud, FolderOpen, Shield, User,
+  Copy, LogOut, UploadCloud, FolderOpen, HardDrive, Shield, User,
   TicketIcon, Plus, X, ChevronDown, Clock, CheckCircle2, AlertCircle,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -38,7 +39,8 @@ export default function PortalDashboard() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [refreshKey, setRefreshKey] = useState(0);
-  const [activeTab, setActiveTab] = useState<'upload' | 'files' | 'tickets'>('upload');
+  const [backupFolder, setBackupFolder] = useState('');
+  const [activeTab, setActiveTab] = useState<'upload' | 'files' | 'backup' | 'tickets'>('upload');
 
   // Ticket state
   const [tickets, setTickets] = useState<Ticket[]>([]);
@@ -101,6 +103,7 @@ export default function PortalDashboard() {
 
   const user = session.user as any;
   const customerId: string = user.customerId ?? '';
+  const hasBackupPlan: boolean = !!user.backupPlan;
 
   const copyId = () => {
     navigator.clipboard.writeText(customerId);
@@ -109,7 +112,7 @@ export default function PortalDashboard() {
 
   return (
     <div className="min-h-[calc(100vh-64px)] py-10 px-4">
-      <div className="max-w-4xl mx-auto space-y-6">
+      <div className="max-w-6xl mx-auto space-y-6">
 
         {/* Welcome card */}
         <div className="bg-navy-800 rounded-2xl p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -160,6 +163,7 @@ export default function PortalDashboard() {
             {([
               { key: 'upload', icon: UploadCloud, label: 'Upload Documents' },
               { key: 'files', icon: FolderOpen, label: 'My Documents' },
+              { key: 'backup', icon: HardDrive, label: 'Backup Folders' },
               { key: 'tickets', icon: TicketIcon, label: 'Support Tickets' },
             ] as const).map(({ key, icon: Icon, label }) => (
               <button
@@ -178,7 +182,11 @@ export default function PortalDashboard() {
           </div>
 
           <div className="p-6">
-            {activeTab === 'upload' && (
+            {activeTab === 'upload' && !hasBackupPlan && (
+              <BackupUpgradeCard feature="upload and download documents from the website" />
+            )}
+
+            {activeTab === 'upload' && hasBackupPlan && (
               <div>
                 <p className="text-sm text-gray-500 mb-5">
                   Upload your documents securely. Files stored under{' '}
@@ -190,7 +198,28 @@ export default function PortalDashboard() {
               </div>
             )}
 
-            {activeTab === 'files' && <FileList refreshKey={refreshKey} />}
+            {activeTab === 'files' && <FileTree refreshKey={refreshKey} canDownload={hasBackupPlan} onUpgradeClick={() => setActiveTab('backup')} />}
+
+            {activeTab === 'backup' && !hasBackupPlan && (
+              <BackupUpgradeCard feature="use your Dropbox backup folders" />
+            )}
+
+            {activeTab === 'backup' && hasBackupPlan && (
+              <div className="space-y-6">
+                <FileUpload
+                  target="backup"
+                  folder={backupFolder}
+                  onFolderChange={setBackupFolder}
+                  onUploadSuccess={() => setRefreshKey((k) => k + 1)}
+                />
+                <FileTree
+                  endpoint="/api/files?area=backup"
+                  refreshKey={refreshKey}
+                  selectedFolder={backupFolder}
+                  onFolderSelect={setBackupFolder}
+                />
+              </div>
+            )}
 
             {activeTab === 'tickets' && (
               <div>

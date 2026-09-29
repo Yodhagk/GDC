@@ -14,6 +14,7 @@ model User {
   password                 String    @default("")
   customerId               String    @unique
   role                     String    @default("client") // client | admin | it_support
+  backupPlan               Boolean   @default(false) // $25/mo Backup plan, set by admin/IT after offline billing: enables uploads, downloads and Backup folders
   isActive                 Boolean   @default(true) // false = deactivated by IT support/admin, login blocked
   emailVerified            DateTime? // null until verified; OAuth sign-ins are auto-verified
   verifyEmailToken         String?   // sha256 hash of the current verification token
@@ -53,4 +54,25 @@ model Ticket {
   response   String?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+}
+
+model AppSetting {
+  key   String @id // e.g. "backupRoot"
+  value String
+}
+
+// Point-in-time copy of a customer's Dropbox listing. Free-plan clients only ever see
+// this snapshot (refreshed at most every 24h); it also feeds the staff Backup Status tab.
+model SyncSnapshot {
+  id           String    @id @default(cuid())
+  customerId   String
+  area         String    // documents | backup
+  data         String    // JSON: { files, folders }
+  fileCount    Int       @default(0)
+  folderCount  Int       @default(0)
+  totalSize    Float     @default(0)
+  lastModified DateTime? // newest file change seen in Dropbox
+  syncedAt     DateTime  @default(now())
+
+  @@unique([customerId, area])
 }

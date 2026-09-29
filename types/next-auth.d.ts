@@ -10,6 +10,7 @@ declare module 'next-auth' {
       image?: string | null;
       customerId: string;
       role: 'client' | 'admin' | 'it_support';
+      backupPlan: boolean;
     };
   }
 
@@ -25,5 +26,6 @@ declare module 'next-auth/jwt' {
     customerId: string;
     role: string;
     isActive: boolean;
+    backupPlan: boolean;
   }
 }
