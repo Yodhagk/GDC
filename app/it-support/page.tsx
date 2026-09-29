@@ -92,6 +92,16 @@ export default function ITSupportDashboard() {
 
   const viewDocuments = (u: UserRow) => setViewingUser(u);
 
+  // Real Dropbox connectivity (was a hardcoded "Operational" label)
+  const [dropboxState, setDropboxState] = useState('Checking…');
+  useEffect(() => {
+    if (status !== 'authenticated') return;
+    fetch('/api/admin/dropbox-status')
+      .then((r) => (r.ok ? r.json() : Promise.reject()))
+      .then((d) => setDropboxState(d.health.connected ? 'Operational' : 'Not connected'))
+      .catch(() => setDropboxState('Check failed'));
+  }, [status]);
+
   const [openingDropbox, setOpeningDropbox] = useState(false);
   const openInDropbox = async (customerId: string) => {
     setOpeningDropbox(true);
@@ -232,7 +242,7 @@ export default function ITSupportDashboard() {
               {[
                 { label: 'Database', status: 'Operational' },
                 { label: 'Authentication', status: 'Operational' },
-                { label: 'Dropbox Storage', status: 'Operational' },
+                { label: 'Dropbox Storage', status: dropboxState },
                 { label: 'Next.js Server', status: 'Operational' },
                 { label: 'Email Service', status: 'Configure SMTP' },
               ].map((item) => (

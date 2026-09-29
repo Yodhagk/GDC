@@ -213,3 +213,52 @@ export async function getOrCreateFolderShareLink(customerId: string): Promise<st
     throw error;
   }
 }
+
+export type DropboxHealth = {
+  credentials: 'refresh_token' | 'access_token' | 'missing';
+  /** Env vars still needed when credentials are missing/partial. Names only, never values. */
+  missingEnv: string[];
+  connected: boolean;
+  account?: { name: string; email: string };
+  documentsRoot: { path: string; exists: boolean };
+  backupRoot: { path: string; exists: boolean };
+  error?: string;
+  checkedAt: string;
+};
+
+/** Read-only connectivity check: credentials, live API call, and both root folders. */
+export async function checkDropboxHealth(): Promise<DropboxHealth> {
+  const backupPath = await getBackupRoot();
+  const health: DropboxHealth = {
+    credentials: 'missing',
+    missingEnv: [],
+    connected: false,
+    documentsRoot: { path: '/GoldenDollarConsultancy', exists: false },
+    backupRoot: { path: backupPath, exists: false },
+    checkedAt: new Date().toISOString(),
+  };
+
+  const { DROPBOX_APP_KEY: key, DROPBOX_APP_SECRET: secret, DROPBOX_REFRESH_TOKEN: refresh, DROPBOX_ACCESS_TOKEN: access } = process.env;
+  if (key && secret && refresh) health.credentials = 'refresh_token';
+  else if (access) health.credentials = 'access_token';
+  else {
+    health.missingEnv = ['DROPBOX_APP_KEY', 'DROPBOX_APP_SECRET', 'DROPBOX_REFRESH_TOKEN'].filter((k) => !process.env[k]);
+    health.error = 'Dropbox credentials are not set on the server.';
+    return health;
+  }
+
+  try {
+    const dbx = getDropboxClient();
+    const acct = await dbx.usersGetCurrentAccount();
+    health.connected = true;
+    health.account = { name: acct.result.name.display_name, email: acct.result.email };
+    health.documentsRoot.exists = await isDropboxFolder(health.documentsRoot.path);
+    health.backupRoot.exists = await isDropboxFolder(backupPath);
+  } catch (error: any) {
+    const summary: string = error?.error?.error_summary ?? error?.error?.error_description ?? error?.message ?? 'Unknown error';
+    health.error = /expired_access_token|invalid_access_token|invalid_grant/.test(summary)
+      ? `Dropbox rejected the token (${summary}). Regenerate the refresh token with scripts/getDropboxToken.cjs.`
+      : `Dropbox request failed: ${summary}`;
+  }
+  return health;
+}

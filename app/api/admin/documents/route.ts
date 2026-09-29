@@ -22,7 +22,9 @@ export async function GET(request: NextRequest) {
     const area: FileArea = new URL(request.url).searchParams.get('area') === 'backup' ? 'backup' : 'documents';
     const { files, folders, sync } = await getEntriesFor({ role }, customerId, area);
     return NextResponse.json({ files, folders, sync });
-  } catch {
-    return NextResponse.json({ files: [], folders: [], error: 'Could not fetch files from Dropbox' });
+  } catch (error: any) {
+    const detail = error?.error?.error_summary ?? error?.message ?? 'unknown error';
+    console.error('Admin documents list error:', detail);
+    return NextResponse.json({ error: `Could not fetch files from Dropbox: ${detail}` }, { status: 502 });
   }
 }

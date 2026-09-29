@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback, useMemo } from 'react';
 import { RefreshCw, Search, AlertTriangle, CheckCircle2, CircleDashed } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { formatFileSize, formatDateTime } from '@/lib/utils';
+import DropboxStatus from '@/components/DropboxStatus';
 
 type Row = {
   id: string;
@@ -88,6 +89,8 @@ export default function BackupStatus() {
 
   return (
     <div className="space-y-4">
+      <DropboxStatus />
+
       <div className="flex items-start gap-2.5 bg-amber-50 border border-amber-200 text-amber-800 rounded-xl px-4 py-3 text-sm">
         <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
         <p>

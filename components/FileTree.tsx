@@ -119,7 +119,10 @@ export default function FileTree({
     setError('');
     try {
       const res = await fetch(endpoint);
-      if (!res.ok) throw new Error('Failed to load files');
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error ?? 'Failed to load files');
+      }
       const data = await res.json();
       const list: FileItem[] = data.files ?? [];
       const dirs: string[] = data.folders ?? [];
